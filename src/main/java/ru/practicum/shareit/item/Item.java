@@ -2,6 +2,8 @@ package ru.practicum.shareit.item;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
+
 @Data
 public class Item {
     private long id;

@@ -19,17 +19,17 @@ public interface ItemService {
     /**
      * Редактирование предмета
      */
-    ItemDto updateItem(long userId, ItemDto itemDto);
+    ItemDto updateItem(long userId, long itemId, ItemDto itemDto);
 
     /**
      * Поиск предмета по описанию
      */
-    List<ItemDto> searchByDescription(String text);
+    List<ItemDto> searchByDescription(long userId, String text);
 
     /**
-     * Поиск предмета по описанию
+     * Поиск предмета по id
      */
-    ItemDto findById(long id);
+    ItemDto findById(long userId, long id);
 
     /**
      * Удаление предмета

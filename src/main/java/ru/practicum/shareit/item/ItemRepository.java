@@ -17,7 +17,7 @@ public interface ItemRepository {
     /**
      * Обновление данных предмета
      */
-    Item update(Item item);
+    Item update(Item item, long itemId);
 
     /**
      * Поиск предмета по id

@@ -2,8 +2,11 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserStorage;
 
 import java.util.List;
 
@@ -11,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
+    private final UserStorage userStorage;
 
     /**
      * Получение списка предметов пользователя
@@ -31,6 +35,7 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public ItemDto addNewItem(long userId, ItemDto itemDto) {
+        User user = userStorage.getUser(userId);
         Item item = itemRepository.save(ItemMapper.toItem(itemDto, userId));
         return ItemMapper.toItemDto(item);
     }
@@ -39,11 +44,15 @@ public class ItemServiceImpl implements ItemService {
      * Редактирование предмета
      *
      * @param userId id пользователя
+     * @param itemId id предмета
      * @param itemDto dto предмета
      */
     @Override
-    public ItemDto updateItem(long userId, ItemDto itemDto) {
-        Item item = itemRepository.update(ItemMapper.toItem(itemDto, userId));
+    public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
+        if (userId != itemRepository.findById(itemId).getOwner()) {
+            throw new UserNotFoundException("Доступ запрещен!");
+        }
+        Item item = itemRepository.update(ItemMapper.toItem(itemDto, userId), itemId);
         return ItemMapper.toItemDto(item);
     }
 
@@ -53,9 +62,9 @@ public class ItemServiceImpl implements ItemService {
      * @param text текст для поиска
      */
     @Override
-    public List<ItemDto> searchByDescription(String text) {
-        List<Item> userItems = itemRepository.findByDescription(text);
-        return ItemMapper.toItemDto(userItems);
+    public List<ItemDto> searchByDescription(long userId, String text) {
+        List<Item> foundItems = itemRepository.findByDescription(text);
+        return ItemMapper.toItemDto(foundItems);
     }
 
     /**
@@ -64,7 +73,7 @@ public class ItemServiceImpl implements ItemService {
      * @param id id предмета
      */
     @Override
-    public ItemDto findById(long id) {
+    public ItemDto findById(long userId, long id) {
         Item item = itemRepository.findById(id);
         return ItemMapper.toItemDto(item);
     }

@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.exception.ValidationException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -8,6 +9,10 @@ import java.util.stream.Collectors;
 @Repository
 public class InMemoryItemStorage implements ItemRepository {
     private final Map<Long, List<Item>> items = new HashMap<>();
+    private static long id = 1;
+    private static long getNextId() {
+        return id++;
+    }
 
     /**
      * Получение списка предметов пользователя
@@ -26,7 +31,10 @@ public class InMemoryItemStorage implements ItemRepository {
      */
     @Override
     public Item save(Item item) {
-        item.setId(getId());
+        if (item.getName().isBlank() || item.getDescription() == null || !item.isAvailable()) {
+            throw new ValidationException("Неверные данные!");
+        }
+        item.setId(getNextId());
         items.compute(item.getOwner(), (userId, userItems) -> {
             if (userItems == null) {
                 userItems = new ArrayList<>();
@@ -43,11 +51,13 @@ public class InMemoryItemStorage implements ItemRepository {
      * @param item предмет
      */
     @Override
-    public Item update(Item item) {
-        Item updated = findById(item.getId());
-        updated.setName(item.getName());
-        updated.setDescription(item.getDescription());
-        updated.setAvailable(item.isAvailable());
+    public Item update(Item item, long itemId) {
+        Item updated = findById(itemId);
+        if (item.getName() != null) { updated.setName(item.getName()); }
+        if (item.getDescription() != null) { updated.setDescription(item.getDescription()); }
+        //if (!item.isAvailable()) {
+            updated.setAvailable(item.isAvailable());
+        //}
         return updated;
     }
 
@@ -92,15 +102,4 @@ public class InMemoryItemStorage implements ItemRepository {
         }
     }
 
-    /**
-     * Метод для генерации id
-     */
-    private long getId() {
-        long lastId = items.values().stream()
-                .flatMap(Collection::stream)
-                .mapToLong(Item::getId)
-                .max()
-                .orElse(0);
-        return lastId + 1;
-    }
 }
