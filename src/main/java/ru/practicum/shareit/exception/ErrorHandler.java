@@ -36,7 +36,13 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFoundException(final NoSuchElementException e) {
+    public ErrorResponse handleUserNotFoundException(final UserNotFoundException e) {
         return new ErrorResponse("Пользователь не найден");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNoSuchElementException(final NoSuchElementException e) {
+        return new ErrorResponse("Not found");
     }
 }

@@ -11,10 +11,11 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookingDto {
-    //private long id;
+
     private long item;
     private long booker;
     private LocalDate start;
     private LocalDate end;
     private Status status;
+
 }

@@ -5,9 +5,9 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserStorage;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -35,7 +35,7 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public ItemDto addNewItem(long userId, ItemDto itemDto) {
-        User user = userStorage.getUser(userId);
+        userStorage.getUser(userId);   // проверка что пользователь существует
         Item item = itemRepository.save(ItemMapper.toItem(itemDto, userId));
         return ItemMapper.toItemDto(item);
     }
@@ -52,8 +52,8 @@ public class ItemServiceImpl implements ItemService {
         if (userId != itemRepository.findById(itemId).getOwner()) {
             throw new UserNotFoundException("Доступ запрещен!");
         }
-        Item item = itemRepository.update(ItemMapper.toItem(itemDto, userId), itemId);
-        return ItemMapper.toItemDto(item);
+        Item updated = itemRepository.update(ItemMapper.toItem(itemDto, userId), itemId);
+        return ItemMapper.toItemDto(updated);
     }
 
     /**
@@ -62,7 +62,8 @@ public class ItemServiceImpl implements ItemService {
      * @param text текст для поиска
      */
     @Override
-    public List<ItemDto> searchByDescription(long userId, String text) {
+    public List<ItemDto> searchByDescription(String text) {
+        if (text.isEmpty()) { return Collections.emptyList(); }
         List<Item> foundItems = itemRepository.findByDescription(text);
         return ItemMapper.toItemDto(foundItems);
     }
@@ -70,11 +71,11 @@ public class ItemServiceImpl implements ItemService {
     /**
      * Поиск предмета по описанию
      *
-     * @param id id предмета
+     * @param itemId id предмета
      */
     @Override
-    public ItemDto findById(long userId, long id) {
-        Item item = itemRepository.findById(id);
+    public ItemDto findById(long userId, long itemId) {
+        Item item = itemRepository.findById(itemId);
         return ItemMapper.toItemDto(item);
     }
 

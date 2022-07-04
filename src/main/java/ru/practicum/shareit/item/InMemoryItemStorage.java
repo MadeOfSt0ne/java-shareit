@@ -31,7 +31,8 @@ public class InMemoryItemStorage implements ItemRepository {
      */
     @Override
     public Item save(Item item) {
-        if (item.getName().isBlank() || item.getDescription() == null || !item.isAvailable()) {
+        if (item.getName().isBlank() || item.getDescription() == null
+                || item.getAvailable() == null) {
             throw new ValidationException("Неверные данные!");
         }
         item.setId(getNextId());
@@ -55,9 +56,7 @@ public class InMemoryItemStorage implements ItemRepository {
         Item updated = findById(itemId);
         if (item.getName() != null) { updated.setName(item.getName()); }
         if (item.getDescription() != null) { updated.setDescription(item.getDescription()); }
-        //if (!item.isAvailable()) {
-            updated.setAvailable(item.isAvailable());
-        //}
+        if (item.getAvailable() != null) { updated.setAvailable(item.getAvailable()); }
         return updated;
     }
 
@@ -84,7 +83,10 @@ public class InMemoryItemStorage implements ItemRepository {
     public List<Item> findByDescription(String text) {
         return items.values().stream()
                 .flatMap(Collection::stream)
-                .filter(item -> item.getName().contains(text) || item.getDescription().contains(text))
+                .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase())
+                        || item.getDescription().toLowerCase().contains(text.toLowerCase()))
+                .filter(Item::getAvailable)
+                .distinct()
                 .collect(Collectors.toList());
     }
 

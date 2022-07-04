@@ -24,12 +24,12 @@ public interface ItemService {
     /**
      * Поиск предмета по описанию
      */
-    List<ItemDto> searchByDescription(long userId, String text);
+    List<ItemDto> searchByDescription(String text);
 
     /**
      * Поиск предмета по id
      */
-    ItemDto findById(long userId, long id);
+    ItemDto findById(long userId, long itemId);
 
     /**
      * Удаление предмета
