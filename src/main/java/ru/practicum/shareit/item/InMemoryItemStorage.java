@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 public class InMemoryItemStorage implements ItemRepository {
     private final Map<Long, List<Item>> items = new HashMap<>();
     private static long id = 1;
+
     private static long getNextId() {
         return id++;
     }
@@ -54,9 +55,15 @@ public class InMemoryItemStorage implements ItemRepository {
     @Override
     public Item update(Item item, long itemId) {
         Item updated = findById(itemId);
-        if (item.getName() != null) { updated.setName(item.getName()); }
-        if (item.getDescription() != null) { updated.setDescription(item.getDescription()); }
-        if (item.getAvailable() != null) { updated.setAvailable(item.getAvailable()); }
+        if (item.getName() != null) {
+            updated.setName(item.getName());
+        }
+        if (item.getDescription() != null) {
+            updated.setDescription(item.getDescription());
+        }
+        if (item.getAvailable() != null) {
+            updated.setAvailable(item.getAvailable());
+        }
         return updated;
     }
 

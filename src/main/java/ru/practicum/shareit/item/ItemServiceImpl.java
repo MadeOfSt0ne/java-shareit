@@ -63,7 +63,9 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public List<ItemDto> searchByDescription(String text) {
-        if (text.isEmpty()) { return Collections.emptyList(); }
+        if (text.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<Item> foundItems = itemRepository.findByDescription(text);
         return ItemMapper.toItemDto(foundItems);
     }

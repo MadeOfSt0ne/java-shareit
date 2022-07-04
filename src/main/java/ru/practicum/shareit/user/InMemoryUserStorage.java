@@ -2,7 +2,6 @@ package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.AlreadyExistsException;
-import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     private final List<User> users = new ArrayList<>();
     private static long id = 1;
+
     private static long getNextId() {
         return id++;
     }
