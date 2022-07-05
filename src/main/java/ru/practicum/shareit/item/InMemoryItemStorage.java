@@ -32,7 +32,7 @@ public class InMemoryItemStorage implements ItemRepository {
      */
     @Override
     public Item save(Item item) {
-        if (item.getName().isBlank() || item.getDescription() == null
+        if (item.getName().isEmpty() || item.getDescription() == null || item.getDescription().isEmpty()
                 || item.getAvailable() == null) {
             throw new ValidationException("Неверные данные!");
         }
