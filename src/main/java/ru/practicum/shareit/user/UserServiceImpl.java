@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 
@@ -10,14 +11,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserStorage userStorage;
+    private final UserRepository userRepository;
 
     /**
      * Получение списка пользователей
      */
     @Override
     public List<UserDto> getUsers() {
-        List<User> users = userStorage.getAllUsers();
+        List<User> users = userRepository.findAll();
         return UserMapper.toUserDto(users);
     }
 
@@ -28,7 +29,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserDto addNewUser(UserDto userDto) {
-        User user = userStorage.addUser(UserMapper.toUser(userDto, 0));
+        User user = userRepository.save(UserMapper.toUser(userDto, 0));
         return UserMapper.toUserDto(user);
     }
 
@@ -39,7 +40,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserDto updateUser(UserDto userDto, long userId) {
-        User user = userStorage.updateUser(UserMapper.toUser(userDto, userId));
+        User user = userRepository.save(UserMapper.toUser(userDto, userId));
         return UserMapper.toUserDto(user);
     }
 
@@ -50,7 +51,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserDto findById(long id) {
-        User user = userStorage.getUser(id);
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
         return UserMapper.toUserDto(user);
     }
 
@@ -61,6 +62,6 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void deleteUser(long id) {
-        userStorage.deleteUser(id);
+        userRepository.deleteById(id);
     }
 }
