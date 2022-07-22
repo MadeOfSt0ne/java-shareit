@@ -1,11 +1,14 @@
 package ru.practicum.shareit.booking;
 
-import lombok.*;
-import org.hibernate.Hibernate;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -21,10 +24,12 @@ public class Booking {
     private LocalDateTime start;
     @Column(name = "end_date_time")
     private LocalDateTime end;
-    @Column(name = "item_id")
-    private long item;
-    @Column(name = "booker_id")
-    private long booker;
+    @JoinColumn(name = "item_id")
+    @ManyToOne
+    private Item item;
+    @JoinColumn(name = "booker_id")
+    @ManyToOne
+    private User booker;
     @Enumerated(EnumType.STRING)
     private Status status;
 

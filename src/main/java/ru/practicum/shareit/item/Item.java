@@ -1,10 +1,13 @@
 package ru.practicum.shareit.item;
 
-import lombok.*;
-import org.hibernate.Hibernate;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
-import java.util.Objects;
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,21 +25,12 @@ public class Item {
     private String description;
     @Column(name = "available")
     private Boolean available;
-    @Column(name = "owner_id")
-    private long owner;
+    @JoinColumn(name = "owner_id")
+    @ManyToOne
+    private User owner;
     @Column(name = "request_id")
     private long request;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Item item = (Item) o;
-        return id != 0 && Objects.equals(id, item.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
+    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    List<Comment> comments;
 }

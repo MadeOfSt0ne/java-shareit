@@ -2,14 +2,18 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.ItemNotFoundException;
+import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,6 +23,7 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
+    private final BookingRepository bookingRepository;
 
     /**
      * Получение списка предметов пользователя
@@ -27,7 +32,7 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public List<ItemDto> getItems(long userId) {
-        List<Item> userItems = itemRepository.findByUserId(userId);
+        List<Item> userItems = itemRepository.findByOwnerId(userId);
         return ItemMapper.toItemDto(userItems);
     }
 
@@ -39,8 +44,8 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public ItemDto addNewItem(long userId, ItemDto itemDto) {
-        userRepository.findById(userId);   // проверка что пользователь существует
-        Item item = itemRepository.save(ItemMapper.toItem(itemDto, userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+        Item item = itemRepository.save(ItemMapper.toItem(itemDto, user));
         return ItemMapper.toItemDto(item);
     }
 
@@ -53,10 +58,11 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
         if (hasAccess(itemId, userId)) {
             throw new ValidationException("Доступ запрещен!");
         }
-        Item updated = itemRepository.save(ItemMapper.toItem(itemDto, userId), itemId);
+        Item updated = itemRepository.save(ItemMapper.toItem(itemDto, user, itemId));
         return ItemMapper.toItemDto(updated);
     }
 
@@ -68,11 +74,11 @@ public class ItemServiceImpl implements ItemService {
      */
     private boolean hasAccess(long itemId, long userId) {
         return userId != itemRepository.findById(itemId)
-                .orElseThrow(() -> new ItemNotFoundException("Предмет не найден")).getOwner();
+                .orElseThrow(() -> new ItemNotFoundException("Предмет не найден")).getOwner().getId();
     }
 
     /**
-     * Поиск предмета по описанию
+     * Поиск предмета по фрагменту в названии или описании
      *
      * @param text текст для поиска
      */
@@ -81,12 +87,13 @@ public class ItemServiceImpl implements ItemService {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
-        List<Item> foundItems = itemRepository.findByDescription(text);
+        List<Item> foundItems =
+                itemRepository.searchItemByNameContainingIgnoreCaseAndDescriptionContainingIgnoreCase(text, text);
         return ItemMapper.toItemDto(foundItems);
     }
 
     /**
-     * Поиск предмета по описанию
+     * Поиск предмета по id
      *
      * @param itemId id предмета
      */
@@ -119,8 +126,28 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new ItemNotFoundException("Предмет не найден"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+        if (commentDto.getText().isEmpty()) {
+            throw new ValidationException("Пустой комментарий");
+        }
         // нужна проверка что пользователь брал вещь в аренду. список букингов в стрим, findAny orElseThrow
-        Comment comment = commentRepository.save(CommentMapper.toComment(commentDto, itemId, userId));
+        bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()).stream()
+                .filter(booking -> booking.getItem().getId() == itemId)
+                .findAny()
+                .orElseThrow(() -> new ValidationException("Доступ запрещен"));
+        Comment comment = commentRepository.save(CommentMapper.toComment(commentDto, item, user));
         return CommentMapper.toCommentDto(comment);
+    }
+
+    /**
+     * Получение списка отзывов предмета
+     *
+     * @param itemId id предмета
+     */
+    @Override
+    public List<CommentDto> getComments(long itemId) {
+        List<Comment> comments = commentRepository.getAllByItemId(itemId);
+        return CommentMapper.toCommentDto(comments);
     }
 }

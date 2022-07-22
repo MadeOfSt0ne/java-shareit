@@ -37,7 +37,7 @@ public class InMemoryItemStorage implements ItemStorage {
             throw new ValidationException("Неверные данные!");
         }
         item.setId(getNextId());
-        items.compute(item.getOwner(), (userId, userItems) -> {
+        items.compute(item.getOwner().getId(), (userId, userItems) -> {
             if (userItems == null) {
                 userItems = new ArrayList<>();
             }

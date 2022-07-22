@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.Comment;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,12 +21,12 @@ public class CommentMapper {
         );
     }
 
-    public static Comment toComment(CommentDto commentDto, long itemId, long userId) {
+    public static Comment toComment(CommentDto commentDto, Item item, User user) {
         Comment comment = new Comment();
         comment.setId(commentDto.getId());
         comment.setText(commentDto.getText());
-        comment.setItem(itemId);
-        comment.setAuthor(userId);
+        comment.setItem(item);
+        comment.setAuthor(user);
         comment.setCreated(commentDto.getCreated());
         return comment;
     }

@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,13 +20,23 @@ public class ItemMapper {
         );
     }
 
-    public static Item toItem(ItemDto itemDto, long userId) {
+    public static Item toItem(ItemDto itemDto, User user) {
         Item item = new Item();
         item.setId(itemDto.getId());
         item.setName(itemDto.getName());
         item.setDescription(itemDto.getDescription());
         item.setAvailable(itemDto.getAvailable());
-        item.setOwner(userId);
+        item.setOwner(user);
+        return item;
+    }
+
+    public static Item toItem(ItemDto itemDto, User user, long itemId) {
+        Item item = new Item();
+        item.setId(itemId);
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setAvailable(itemDto.getAvailable());
+        item.setOwner(user);
         return item;
     }
 

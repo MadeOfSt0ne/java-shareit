@@ -41,4 +41,9 @@ public interface ItemService {
      * Добавление комментария к предмету
      */
     CommentDto addComment(long userId, long itemId, CommentDto commentDto);
+
+    /**
+     * Получение списка отзывов предмета
+     */
+    List<CommentDto> getComments(long itemId);
 }

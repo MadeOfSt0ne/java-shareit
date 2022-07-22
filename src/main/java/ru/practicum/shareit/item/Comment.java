@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -20,10 +21,12 @@ public class Comment {
     private long id;
     @Column(name = "text")
     private String text;
-    @Column(name = "item_id")
-    private long item;
-    @Column(name = "author_id")
-    private long author;
+    @JoinColumn(name = "item_id")
+    @ManyToOne
+    private Item item;
+    @JoinColumn(name = "author_id")
+    @ManyToOne
+    private User author;
     @Column(name = "created")
     private Instant created = Instant.now();
 }
