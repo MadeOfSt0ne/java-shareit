@@ -24,7 +24,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
-    private final static LocalDateTime NOW = LocalDateTime.now();
+    private static final LocalDateTime NOW = LocalDateTime.now();
 
     /**
      * Добавление нового бронирования
@@ -63,8 +63,8 @@ public class BookingServiceImpl implements BookingService {
         if (approved == null) {
             throw new ValidationException("Approved не может быть пустым");
         }
-        Booking booking = bookingRepository.findById(bookingId).
-                orElseThrow(() -> new ItemNotFoundException("Бронирование не найдено"));
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ItemNotFoundException("Бронирование не найдено"));
         if (booking.getStatus() == Status.APPROVED) {
             throw new ValidationException("Статус уже изменен");
         }
