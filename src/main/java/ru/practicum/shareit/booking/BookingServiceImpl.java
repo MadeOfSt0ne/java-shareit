@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
+import ru.practicum.shareit.booking.dto.NewBookingDto;
 import ru.practicum.shareit.booking.dto.UpdateBookingDto;
 import ru.practicum.shareit.exception.ItemNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
@@ -30,16 +31,16 @@ public class BookingServiceImpl implements BookingService {
      * Добавление нового бронирования
      *
      * @param userId id пользователя
-     * @param bookingDto dto бронирования
+     * @param booking dto бронирования
      */
     @Override
-    public BookingDto addNewBooking(long userId, BookingDto bookingDto) {
-        if (bookingDto.getEnd().isBefore(bookingDto.getStart()) || bookingDto.getEnd().isBefore(LocalDateTime.now())
-            || bookingDto.getStart().isBefore(LocalDateTime.now())) {
+    public BookingDto addNewBooking(long userId, NewBookingDto booking) {
+        if (booking.getEnd().isBefore(booking.getStart()) || booking.getEnd().isBefore(LocalDateTime.now())
+            || booking.getStart().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Некорректное время окончания бронирования");
         }
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
-        Item item = itemRepository.findById(bookingDto.getItemId())
+        Item item = itemRepository.findById(booking.getItemId())
                 .orElseThrow(() -> new ItemNotFoundException("Предмет не найден"));
         if (!item.getAvailable()) {
             throw new ValidationException("Предмет не доступен");
@@ -47,8 +48,8 @@ public class BookingServiceImpl implements BookingService {
         if (userId == item.getOwner().getId()) {
             throw new UserNotFoundException("Owner");
         }
-        Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, item, user, Status.WAITING));
-        return BookingMapper.toBookingDto(booking);
+        Booking newBooking = bookingRepository.save(BookingMapper.toBooking(booking, user, item, Status.WAITING));
+        return BookingMapper.toBookingDto(newBooking);
     }
 
     /**

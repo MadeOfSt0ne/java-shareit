@@ -15,9 +15,8 @@ public class BookingMapper {
     public static BookingDto toBookingDto(Booking booking) {
         return new BookingDto(
                 booking.getId(),
-                booking.getItem().getId(),
-                booking.getItem().getName(),
-                booking.getBooker().getId(),
+                new BookingDto.Item(booking.getItem().getId(), booking.getItem().getName()),
+                new BookingDto.User(booking.getBooker().getId()),
                 booking.getStart(),
                 booking.getEnd(),
                 booking.getStatus()
@@ -28,8 +27,8 @@ public class BookingMapper {
         return new UpdateBookingDto(
                 booking.getId(),
                 booking.getStatus(),
-                booking.getBooker().getId(),
-                booking.getItem().getId(),
+                new UpdateBookingDto.User(booking.getBooker().getId()),
+                new UpdateBookingDto.Item(booking.getItem().getId(), booking.getItem().getName()),
                 booking.getItem().getName()
         );
     }
@@ -41,7 +40,7 @@ public class BookingMapper {
         );
     }
 
-    public static Booking toBooking(BookingDto bookingDto, Item item, User user, Status status) {
+    public static Booking toBooking(NewBookingDto bookingDto, User user, Item item, Status status) {
         Booking booking = new Booking();
         booking.setId(bookingDto.getId());
         booking.setItem(item);

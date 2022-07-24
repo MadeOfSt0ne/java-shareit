@@ -13,7 +13,20 @@ import ru.practicum.shareit.booking.Status;
 public class UpdateBookingDto {
     private long id;
     private Status status;
-    private long bookerId;
-    private long itemId;
+    private User booker;
+    private Item item;
     private String itemName;
+
+    @Data
+    @AllArgsConstructor
+    static class Item {
+        private long id;
+        private String name;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class User {
+        private long id;
+    }
 }

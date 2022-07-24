@@ -43,16 +43,6 @@ public class ItemMapper {
         return item;
     }
 
-    public static Item toItem(ItemDto itemDto, User user, long itemId) {
-        Item item = new Item();
-        item.setId(itemId);
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setAvailable(itemDto.getAvailable());
-        item.setOwner(user);
-        return item;
-    }
-
     public static List<ItemDto> toItemDto(Collection<Item> items) {
         List<ItemDto> dtos = new ArrayList<>();
         for (Item item : items) {
