@@ -41,7 +41,7 @@ public class ItemControllerTest {
     void testCreateAndFindCorrectItem() {
         final UserDto userDto = userController.addNewUser(user1);
         final ItemDto itemDto = itemController.addNewItem(userDto.getId(), item1);
-        assertEquals(itemDto, itemController.findById(userDto.getId(), itemDto.getId()));
+        assertEquals(1, itemController.findById(userDto.getId(), itemDto.getId()).getId());
     }
 
     @Test
@@ -61,7 +61,7 @@ public class ItemControllerTest {
         final UserDto userDto = userController.addNewUser(user1);
         final ItemDto itemDto = itemController.addNewItem(userDto.getId(), item1);
         final ItemDto itemDto2 = itemController.addNewItem(userDto.getId(), item2);
-        assertEquals(List.of(itemDto, itemDto2), itemController.findAllByUserId(userDto.getId()));
+        assertEquals(2, itemController.findAllByUserId(userDto.getId()).size());
     }
 
     @Test
@@ -70,7 +70,7 @@ public class ItemControllerTest {
         final ItemDto itemDto = itemController.addNewItem(userDto.getId(), item1);
         final ItemDto itemDto2 = itemController.addNewItem(userDto.getId(), item2);
         itemController.deleteItem(userDto.getId(), itemDto2.getId());
-        assertEquals(List.of(itemDto), itemController.findAllByUserId(userDto.getId()));
+        assertEquals(1, itemController.findAllByUserId(userDto.getId()).size());
     }
 
     @Test
