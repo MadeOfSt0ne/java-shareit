@@ -1,19 +1,22 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.dto.BookingMapper;
+import ru.practicum.shareit.booking.dto.LastNextBookingDto;
 import ru.practicum.shareit.exception.ItemNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.CommentMapper;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,9 +34,13 @@ public class ItemServiceImpl implements ItemService {
      * @param userId id пользователя
      */
     @Override
-    public List<ItemDto> getItems(long userId) {
+    public List<ItemOwnerDto> getItems(long userId) {
         List<Item> userItems = itemRepository.findByOwnerId(userId);
-        return ItemMapper.toItemDto(userItems);
+        List<ItemOwnerDto> result = new ArrayList<>();
+        for (Item item : userItems) {
+            result.add(findById(userId, item.getId()));
+        }
+        return result;
     }
 
     /**
@@ -44,6 +51,10 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public ItemDto addNewItem(long userId, ItemDto itemDto) {
+        if (itemDto.getName().isEmpty() || itemDto.getDescription() == null || itemDto.getDescription().isEmpty()
+                || itemDto.getAvailable() == null) {
+            throw new ValidationException("Неверные данные!");
+        }
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
         Item item = itemRepository.save(ItemMapper.toItem(itemDto, user));
         return ItemMapper.toItemDto(item);
@@ -59,10 +70,18 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
-        if (hasAccess(itemId, userId)) {
-            throw new ValidationException("Доступ запрещен!");
+        checkAccess(itemId, userId);
+        Item updated = itemRepository.findById(itemId).orElseThrow(() -> new ItemNotFoundException("Предмет не найден"));
+        if (itemDto.getName() != null) {
+            updated.setName(itemDto.getName());
         }
-        Item updated = itemRepository.save(ItemMapper.toItem(itemDto, user, itemId));
+        if (itemDto.getDescription() != null) {
+            updated.setDescription(itemDto.getDescription());
+        }
+        if (itemDto.getAvailable() != null) {
+            updated.setAvailable(itemDto.getAvailable());
+        }
+        itemRepository.save(updated);
         return ItemMapper.toItemDto(updated);
     }
 
@@ -72,9 +91,12 @@ public class ItemServiceImpl implements ItemService {
      * @param userId id пользователя
      * @param itemId id предмета
      */
-    private boolean hasAccess(long itemId, long userId) {
-        return userId != itemRepository.findById(itemId)
-                .orElseThrow(() -> new ItemNotFoundException("Предмет не найден")).getOwner().getId();
+    @SneakyThrows
+    private void checkAccess(long itemId, long userId) {
+        if (userId != itemRepository.findById(itemId)
+                .orElseThrow(() -> new ItemNotFoundException("Предмет не найден")).getOwner().getId()) {
+            throw new AccessDeniedException("Доступ запрещен!");
+        }
     }
 
     /**
@@ -88,7 +110,7 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
         List<Item> foundItems =
-                itemRepository.searchItemByNameContainingIgnoreCaseAndDescriptionContainingIgnoreCase(text, text);
+                itemRepository.searchAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text);
         return ItemMapper.toItemDto(foundItems);
     }
 
@@ -98,9 +120,23 @@ public class ItemServiceImpl implements ItemService {
      * @param itemId id предмета
      */
     @Override
-    public ItemDto findById(long userId, long itemId) {
+    public ItemOwnerDto findById(long userId, long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new ItemNotFoundException("Предмет не найден"));
-        return ItemMapper.toItemDto(item);
+        Booking l = bookingRepository.getFirstByItemIdOrderByEndDesc(itemId);
+        Booking n = bookingRepository.getFirstByItemIdOrderByStartAsc(itemId);
+        LastNextBookingDto last = null;
+        if (l != null) {
+            last = BookingMapper.toLastNextBookingDto(l);
+        }
+        LastNextBookingDto next = null;
+        if (n != null) {
+            next = BookingMapper.toLastNextBookingDto(n);
+        }
+        List<CommentDto> comments = getComments(itemId);
+        if (userId == item.getOwner().getId()) {
+            return ItemMapper.toItemOwnerDto(item, comments, next, last);
+        }
+        return ItemMapper.toItemOwnerDto(item, comments, null, null);
     }
 
     /**
@@ -111,9 +147,7 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public void deleteItem(long userId, long itemId) {
-        if (hasAccess(itemId, userId)) {
-            throw new ValidationException("Доступ запрещен!");
-        }
+        checkAccess(itemId, userId);
         itemRepository.deleteById(itemId);
     }
 
@@ -124,6 +158,7 @@ public class ItemServiceImpl implements ItemService {
      * @param itemId id предмета
      * @param commentDto dto комментария
      */
+    @SneakyThrows
     @Override
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new ItemNotFoundException("Предмет не найден"));
@@ -131,7 +166,7 @@ public class ItemServiceImpl implements ItemService {
         if (commentDto.getText().isEmpty()) {
             throw new ValidationException("Пустой комментарий");
         }
-        // нужна проверка что пользователь брал вещь в аренду. список букингов в стрим, findAny orElseThrow
+        // проверка что пользователь брал вещь в аренду
         bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()).stream()
                 .filter(booking -> booking.getItem().getId() == itemId)
                 .findAny()

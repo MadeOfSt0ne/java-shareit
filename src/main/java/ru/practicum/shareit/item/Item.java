@@ -28,8 +28,6 @@ public class Item {
     @JoinColumn(name = "owner_id")
     @ManyToOne
     private User owner;
-    @Column(name = "request_id")
-    private long request;
     @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     @ToString.Exclude
     List<Comment> comments;

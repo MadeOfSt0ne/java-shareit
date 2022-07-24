@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.booking.dto.LastNextBookingDto;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
@@ -15,8 +16,20 @@ public class ItemMapper {
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
+                item.getAvailable()
+        );
+    }
+
+    public static ItemOwnerDto toItemOwnerDto(Item item, List<CommentDto> comments,
+                  LastNextBookingDto last, LastNextBookingDto next) {
+        return new ItemOwnerDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
                 item.getAvailable(),
-                item.getOwner()
+                last,
+                next,
+                comments
         );
     }
 

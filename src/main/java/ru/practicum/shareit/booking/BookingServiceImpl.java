@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
+import ru.practicum.shareit.booking.dto.UpdateBookingDto;
 import ru.practicum.shareit.exception.ItemNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
@@ -32,41 +34,47 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     public BookingDto addNewBooking(long userId, BookingDto bookingDto) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
-        itemRepository.findById(bookingDto.getItem().getId()).orElseThrow(() -> new ItemNotFoundException("Предмет не найден"));
         if (bookingDto.getEnd().isBefore(bookingDto.getStart()) || bookingDto.getEnd().isBefore(LocalDateTime.now())
             || bookingDto.getStart().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Некорректное время окончания бронирования");
         }
-        Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, user, Status.WAITING));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+        Item item = itemRepository.findById(bookingDto.getItemId())
+                .orElseThrow(() -> new ItemNotFoundException("Предмет не найден"));
+        if (!item.getAvailable()) {
+            throw new ValidationException("Предмет не доступен");
+        }
+        if (userId == item.getOwner().getId()) {
+            throw new UserNotFoundException("Owner");
+        }
+        Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, item, user, Status.WAITING));
         return BookingMapper.toBookingDto(booking);
     }
 
     /**
      * Обновление бронирования
      *
-     * @param userId id пользователя
+     * @param userId    id пользователя
      * @param bookingId id бронирования
-     * @param approved подтверждено бронирование или отклонено
+     * @param approved  подтверждено бронирование или отклонено
      */
     @Override
-    public BookingDto updateBooking(long userId, long bookingId, Boolean approved) {
+    public UpdateBookingDto updateBooking(long userId, long bookingId, Boolean approved) {
         if (approved == null) {
             throw new ValidationException("Approved не может быть пустым");
         }
         Booking booking = bookingRepository.findById(bookingId).
                 orElseThrow(() -> new ItemNotFoundException("Бронирование не найдено"));
+        if (booking.getStatus() == Status.APPROVED) {
+            throw new ValidationException("Статус уже изменен");
+        }
         if (userId != itemRepository.findById(booking.getItem().getId())
                 .orElseThrow(() -> new ItemNotFoundException("Предмет не найден")).getOwner().getId()) {
-            throw new ValidationException("Доступ запрещен");
+            throw new UserNotFoundException("Доступ запрещен");
         }
-        if (approved) {
-            booking.setStatus(Status.APPROVED);
-        } else {
-            booking.setStatus(Status.REJECTED);
-        }
-        bookingRepository.save(booking);
-        return BookingMapper.toBookingDto(booking);
+        booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
+        Booking updated = bookingRepository.save(booking);
+        return BookingMapper.toUpdateBookingDto(updated);
     }
 
     /**
@@ -77,8 +85,12 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     public BookingDto findBooking(long userId, long bookingId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ItemNotFoundException("Бронирование не найдено"));
+        if (userId != booking.getBooker().getId() && userId != booking.getItem().getOwner().getId()) {
+            throw new UserNotFoundException("Бронирование не найдено");
+        }
         return BookingMapper.toBookingDto(booking);
     }
 

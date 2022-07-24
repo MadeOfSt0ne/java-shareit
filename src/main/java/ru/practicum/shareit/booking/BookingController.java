@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.UpdateBookingDto;
 
 import java.util.List;
 
@@ -22,9 +23,9 @@ public class BookingController {
         return bookingService.addNewBooking(userId, bookingDto);
     }
 
-    @PatchMapping("/{bookingId}?approved={approved}")
-    public BookingDto updateBooking(@RequestHeader(HEADER) long userId,
-                                    @PathVariable long bookingId, @PathVariable Boolean approved) {
+    @PatchMapping("/{bookingId}")
+    public UpdateBookingDto updateBooking(@RequestHeader(HEADER) long userId,
+                                          @PathVariable long bookingId, @RequestParam Boolean approved) {
         log.info("User {} updated booking {} set approval = {}", userId, bookingId, approved);
         return bookingService.updateBooking(userId, bookingId, approved);
     }

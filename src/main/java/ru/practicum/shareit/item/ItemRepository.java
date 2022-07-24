@@ -14,10 +14,10 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByOwnerId(long userId);
 
     /**
-     * Поиск предмета по фрагменту в названии и описании
+     * Поиск предмета по фрагменту в названии и описании. Available = true
      *
      * @param name текст для поиска
      * @param description текст для поиска
      */
-    List<Item> searchItemByNameContainingIgnoreCaseAndDescriptionContainingIgnoreCase(String name, String description);
+    List<Item> searchAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(String name, String description);
 }

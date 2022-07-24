@@ -32,10 +32,6 @@ public class InMemoryItemStorage implements ItemStorage {
      */
     @Override
     public Item save(Item item) {
-        if (item.getName().isEmpty() || item.getDescription() == null || item.getDescription().isEmpty()
-                || item.getAvailable() == null) {
-            throw new ValidationException("Неверные данные!");
-        }
         item.setId(getNextId());
         items.compute(item.getOwner().getId(), (userId, userItems) -> {
             if (userItems == null) {
@@ -54,17 +50,7 @@ public class InMemoryItemStorage implements ItemStorage {
      */
     @Override
     public Item update(Item item, long itemId) {
-        Item updated = findById(itemId);
-        if (item.getName() != null) {
-            updated.setName(item.getName());
-        }
-        if (item.getDescription() != null) {
-            updated.setDescription(item.getDescription());
-        }
-        if (item.getAvailable() != null) {
-            updated.setAvailable(item.getAvailable());
-        }
-        return updated;
+        return findById(itemId);
     }
 
     /**

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemOwnerDto;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto findById(@RequestHeader(HEADER) long userId, @PathVariable long itemId) {
+    public ItemOwnerDto findById(@RequestHeader(HEADER) long userId, @PathVariable long itemId) {
         log.info("Get item id = {}", itemId);
         return itemService.findById(userId, itemId);
     }
@@ -43,7 +44,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> findAllByUserId(@RequestHeader(HEADER) long userId) {
+    public List<ItemOwnerDto> findAllByUserId(@RequestHeader(HEADER) long userId) {
         log.info("Get items by user id = {}", userId);
         return itemService.getItems(userId);
     }
