@@ -185,4 +185,15 @@ public class ItemServiceImpl implements ItemService {
         List<Comment> comments = commentRepository.getAllByItemId(itemId);
         return CommentMapper.toCommentDto(comments);
     }
+
+    /**
+     * Получение списка предметов, подходящих под запрос
+     *
+     * @param requestId id запроса
+     */
+    @Override
+    public List<ItemDto> getItemsForRequest(long requestId) {
+        List<Item> items = itemRepository.searchAllByRequestId(requestId);
+        return ItemMapper.toItemDto(items);
+    }
 }

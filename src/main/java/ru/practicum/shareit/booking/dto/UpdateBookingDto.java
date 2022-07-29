@@ -15,7 +15,6 @@ public class UpdateBookingDto {
     private Status status;
     private User booker;
     private Item item;
-    private String itemName;
 
     @Data
     @AllArgsConstructor

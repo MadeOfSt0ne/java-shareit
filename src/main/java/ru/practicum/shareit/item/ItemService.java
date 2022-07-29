@@ -47,4 +47,9 @@ public interface ItemService {
      * Получение списка отзывов предмета
      */
     List<CommentDto> getComments(long itemId);
+
+    /**
+     * Получение списка предметов, подходящих под запрос
+     */
+    List<ItemDto> getItemsForRequest(long requestId);
 }

@@ -25,5 +25,5 @@ public class ItemRequest {
     @ManyToOne
     private User requester;
     @Column(name = "created")
-    private LocalDateTime created;
+    private LocalDateTime created = LocalDateTime.now();
 }

@@ -30,4 +30,6 @@ public class Item {
     @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     @ToString.Exclude
     List<Comment> comments;
+    @Column(name = "request_id")
+    private long requestId;
 }

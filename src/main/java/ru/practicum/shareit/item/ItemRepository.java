@@ -20,4 +20,12 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
      * @param description текст для поиска
      */
     List<Item> searchAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(String name, String description);
+
+    /**
+     * Поиск предметов, подходящих под запрос
+     *
+     * @param requestId id запроса
+     */
+    List<Item> searchAllByRequestId(long requestId);
 }
+
