@@ -3,8 +3,8 @@ package ru.practicum.shareit.user;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.practicum.shareit.exception.AlreadyExistsException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 
@@ -47,7 +47,7 @@ class UserControllerTest {
 	@Test
 	void testCreateUserWithExistingEmail() {
 		final UserDto userDto = userController.addNewUser(user1);
-		assertThrows(AlreadyExistsException.class,
+		assertThrows(DataIntegrityViolationException.class,
 				() -> userController.addNewUser(user2.toBuilder().email("test1@test.com").build()));
 	}
 
@@ -63,7 +63,7 @@ class UserControllerTest {
 	void testUpdateUserExistingEmail() {
 		final UserDto userDto1 = userController.addNewUser(user1);
 		final UserDto userDto2 = userController.addNewUser(user2);
-		assertThrows(AlreadyExistsException.class,
+		assertThrows(DataIntegrityViolationException.class,
 				() -> userController.updateUser(user3.toBuilder().email("test1@test.com").build(), userDto2.getId()));
 	}
 

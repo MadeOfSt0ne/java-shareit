@@ -1,36 +1,23 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.List;
 
-public interface ItemRepository {
+public interface ItemRepository extends JpaRepository<Item, Long> {
 
     /**
      * Получение списка предметов пользователя
+     *
+     * @param userId id пользователя
      */
-    List<Item> findByUserId(long userId);
+    List<Item> findByOwnerId(long userId);
 
     /**
-     * Сохранение предмета
+     * Поиск предмета по фрагменту в названии и описании. Available = true
+     *
+     * @param name текст для поиска
+     * @param description текст для поиска
      */
-    Item save(Item item);
-
-    /**
-     * Обновление данных предмета
-     */
-    Item update(Item item, long itemId);
-
-    /**
-     * Поиск предмета по id
-     */
-    Item findById(long itemId);
-
-    /**
-     * Поиск предмета по описанию
-     */
-    List<Item> findByDescription(String text);
-
-    /**
-     * Удаление предмета по id пользователя и id предмета
-     */
-    void deleteItem(long userId, long itemId);
+    List<Item> searchAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(String name, String description);
 }
