@@ -10,4 +10,5 @@ public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> 
      * Получение списка запросов пользователя
      */
     List<ItemRequest> findAllByRequesterId(long requesterId);
+
 }

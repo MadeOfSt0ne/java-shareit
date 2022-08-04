@@ -2,6 +2,9 @@ package ru.practicum.shareit.requests;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemService;
@@ -18,26 +21,23 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ItemRequestServiceImpl implements ItemRequestService {
-
     private final ItemRequestRepository requestRepository;
-
     private final ItemService itemService;
-
     private final UserRepository userRepository;
 
     /**
      * Добавление нового запроса
      *
      * @param userId id пользователя
-     * @param itemRequest запрос
+     * @param itemRequestDto запрос
      */
     @Override
-    public ItemRequestDto addNewItemRequest(long userId, ItemRequestDto itemRequest) {
-        if (itemRequest.getDescription().isEmpty()) {
+    public ItemRequestDto addNewItemRequest(long userId, ItemRequestDto itemRequestDto) {
+        User user = userRepository.findById(userId).orElseThrow();
+        if (itemRequestDto.getDescription().isBlank()) {
             throw new ValidationException("Пустое описание");
         }
-        User user = userRepository.findById(userId).orElseThrow();
-        ItemRequest request = requestRepository.save(ItemRequestMapper.toItemRequest(user, itemRequest));
+        ItemRequest request = requestRepository.save(ItemRequestMapper.toItemRequest(user, itemRequestDto));
         return ItemRequestMapper.toItemRequestDto(request);
     }
 
@@ -48,7 +48,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
      */
     @Override
     public List<ItemRequestWithAnswersDto> getOwnRequests(long userId) {
-        List<ItemRequest> requests = new ArrayList<>(requestRepository.findAllByRequesterId(userId));
+        userRepository.findById(userId).orElseThrow();
+        List<ItemRequest> requests = requestRepository.findAllByRequesterId(userId);
         List<ItemRequestWithAnswersDto> items = new ArrayList<>();
         for (ItemRequest request : requests) {
             items.add(ItemRequestMapper.toItemRequestDto(request, itemService.getItemsForRequest(request.getId())));
@@ -64,8 +65,16 @@ public class ItemRequestServiceImpl implements ItemRequestService {
      * @param size количество элементов для отображения
      */
     @Override
-    public Page<ItemRequestDto> getAllRequests(long userId, int from, int size) {
-        return null;
+    public List<ItemRequestWithAnswersDto> getAllRequests(long userId, int from, int size) {
+        Pageable pageable = PageRequest.of(from, size, Sort.by("created").descending());
+        Page<ItemRequest> requests = requestRepository.findAll(pageable);
+        List<ItemRequestWithAnswersDto> result = new ArrayList<>();
+        for (ItemRequest request : requests.getContent()) {
+            if (request.getRequester().getId() != userId) {
+                result.add(ItemRequestMapper.toItemRequestDto(request, itemService.getItemsForRequest(request.getId())));
+            }
+        }
+        return result;
     }
 
     /**
@@ -76,7 +85,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
      */
     @Override
     public ItemRequestWithAnswersDto getRequest(long userId, long requestId) {
-        User user = userRepository.findById(userId).orElseThrow();
+        userRepository.findById(userId).orElseThrow();
         ItemRequest itemRequest = requestRepository.findById(requestId).orElseThrow();
         List<ItemDto> items = itemService.getItemsForRequest(requestId);
         return ItemRequestMapper.toItemRequestDto(itemRequest, items);

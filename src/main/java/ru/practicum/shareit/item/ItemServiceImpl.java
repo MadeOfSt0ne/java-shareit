@@ -2,6 +2,10 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -19,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,8 +39,9 @@ public class ItemServiceImpl implements ItemService {
      * @param userId id пользователя
      */
     @Override
-    public List<ItemOwnerDto> getItems(long userId) {
-        List<Item> userItems = itemRepository.findByOwnerId(userId);
+    public List<ItemOwnerDto> getItems(long userId, int from, int size) {
+        Pageable pageable = PageRequest.of(from, size, Sort.by("id").ascending());
+        Page<Item> userItems = itemRepository.findByOwnerId(userId, pageable);
         List<ItemOwnerDto> result = new ArrayList<>();
         for (Item item : userItems) {
             result.add(findById(userId, item.getId()));
@@ -69,7 +75,7 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
         checkAccess(itemId, userId);
         Item updated = itemRepository.findById(itemId).orElseThrow(() -> new ItemNotFoundException("Предмет не найден"));
         if (itemDto.getName() != null) {
@@ -105,13 +111,17 @@ public class ItemServiceImpl implements ItemService {
      * @param text текст для поиска
      */
     @Override
-    public List<ItemDto> searchByDescription(String text) {
+    public List<ItemDto> searchByDescription(String text, int from, int size) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
-        List<Item> foundItems =
-                itemRepository.searchAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text);
-        return ItemMapper.toItemDto(foundItems);
+        Pageable pageable = PageRequest.of(from, size, Sort.by("id").ascending());
+        Page<Item> foundItems =
+                itemRepository.searchAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
+                        text, text, pageable);
+        return foundItems.stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -167,7 +177,7 @@ public class ItemServiceImpl implements ItemService {
             throw new ValidationException("Пустой комментарий");
         }
         // проверка что пользователь брал вещь в аренду
-        bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()).stream()
+        bookingRepository.findByBookerIdAndEndBefore(userId, LocalDateTime.now()).stream()
                 .filter(booking -> booking.getItem().getId() == itemId)
                 .findAny()
                 .orElseThrow(() -> new ValidationException("Доступ запрещен"));

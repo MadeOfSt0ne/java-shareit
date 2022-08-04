@@ -2,7 +2,6 @@ package ru.practicum.shareit.requests;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.requests.dto.ItemRequestDto;
 import ru.practicum.shareit.requests.dto.ItemRequestWithAnswersDto;
@@ -31,12 +30,12 @@ public class ItemRequestController {
         return requestService.getOwnRequests(userId);
     }
 
-    @GetMapping
-    public Page<ItemRequestDto> getAllRequests(@RequestHeader(HEADER) long userId,
-                                               @RequestParam(value = "from", defaultValue = "0") int from,
-                                               @RequestParam(value = "size", defaultValue = "20") int size) {
-        log.info("User {} get all requests", userId);
-        return requestService.getAllRequests(userId, from, size);
+    @GetMapping("/all")
+    public List<ItemRequestWithAnswersDto> getAllRequests(@RequestHeader(HEADER) long userId,
+                                               @RequestParam(value = "from", required = false) Integer from,
+                                               @RequestParam(value = "size", required = false) Integer size) {
+        log.info("User {} get all requests with from = {} and size = {}", userId, from, size);
+        return requestService.getAllRequests(userId, from == null ? 0 : from, size == null ? 10 : size);
     }
 
     @GetMapping("/{requestId}")

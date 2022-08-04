@@ -47,13 +47,15 @@ public class ItemControllerTest {
     @Test
     void testCreateBlankName() {
         final UserDto userDto = userController.addNewUser(user1);
-        assertThrows(ValidationException.class, () -> itemController.addNewItem(userDto.getId(), item1.toBuilder().name("").build()));
+        assertThrows(ValidationException.class, () ->
+                itemController.addNewItem(userDto.getId(), item1.toBuilder().name("").build()));
     }
 
     @Test
     void testCreateBlankDescription() {
         final UserDto userDto = userController.addNewUser(user1);
-        assertThrows(ValidationException.class, () -> itemController.addNewItem(userDto.getId(), item1.toBuilder().description("").build()));
+        assertThrows(ValidationException.class, () ->
+                itemController.addNewItem(userDto.getId(), item1.toBuilder().description("").build()));
     }
 
     @Test
@@ -61,7 +63,7 @@ public class ItemControllerTest {
         final UserDto userDto = userController.addNewUser(user1);
         final ItemDto itemDto = itemController.addNewItem(userDto.getId(), item1);
         final ItemDto itemDto2 = itemController.addNewItem(userDto.getId(), item2);
-        assertEquals(2, itemController.findAllByUserId(userDto.getId()).size());
+        assertEquals(2, itemController.findAllByUserId(userDto.getId(), 0, 10).size());
     }
 
     @Test
@@ -70,13 +72,21 @@ public class ItemControllerTest {
         final ItemDto itemDto = itemController.addNewItem(userDto.getId(), item1);
         final ItemDto itemDto2 = itemController.addNewItem(userDto.getId(), item2);
         itemController.deleteItem(userDto.getId(), itemDto2.getId());
-        assertEquals(1, itemController.findAllByUserId(userDto.getId()).size());
+        assertEquals(1, itemController.findAllByUserId(userDto.getId(), 0, 10).size());
     }
 
     @Test
     void testSearchItemByDescription() {
         final UserDto userDto = userController.addNewUser(user1);
         final ItemDto itemDto = itemController.addNewItem(userDto.getId(), item1.toBuilder().name("roBOcoP").build());
-        assertEquals(List.of(itemDto), itemController.findByDescription("oboc"));
+        assertEquals(List.of(itemDto), itemController.findByDescription("oboc", 0, 10));
+        final ItemDto itemDto1 = itemController.addNewItem(userDto.getId(), item1.toBuilder().description("GaLaXy").build());
+        assertEquals(List.of(itemDto1), itemController.findByDescription("ALAx", 0, 10));
+    }
+
+    @Test
+    void testAddComment() {
+        final UserDto userDto = userController.addNewUser(user1);
+        final ItemDto itemDto = itemController.addNewItem(userDto.getId(), item1);
     }
 }
