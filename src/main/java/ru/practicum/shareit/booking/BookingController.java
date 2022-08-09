@@ -40,8 +40,8 @@ public class BookingController {
     @GetMapping
     public List<BookingDto> getAllBookingsFromUser(@RequestHeader(HEADER) long userId,
                             @RequestParam(value = "state", required = false, defaultValue = "ALL") String state,
-                            @RequestParam(value = "from", required = false, defaultValue = "0") Integer from,
-                            @RequestParam(value = "size", required = false, defaultValue = "10") Integer size) {
+                            @RequestParam(value = "from", required = false, defaultValue = "0") int from,
+                            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         log.info("User {} get own bookings state = {}", userId, state);
         return bookingService.getAllFromUser(userId, state, from, size);
     }
@@ -49,8 +49,8 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingDto> getAllBookingsForUsersItems(@RequestHeader(HEADER) long userId,
                             @RequestParam(value = "state", required = false, defaultValue = "ALL") String state,
-                            @RequestParam(value = "from", required = false, defaultValue = "0") Integer from,
-                            @RequestParam(value = "size", required = false, defaultValue = "10") Integer size) {
+                            @RequestParam(value = "from", required = false, defaultValue = "0") int from,
+                            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         log.info("User {} get bookings for items state = {}", userId, state);
         return bookingService.getAllForItems(userId, state, from, size);
     }

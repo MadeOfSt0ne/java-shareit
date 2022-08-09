@@ -39,18 +39,18 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemDto> findByDescription(@RequestParam(value = "text") String text,
-                                           @RequestParam(value = "from", required = false) Integer from,
-                                           @RequestParam(value = "size", required = false) Integer size) {
+                                           @RequestParam(value = "from", required = false, defaultValue = "0") int from,
+                                           @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         log.info("Get item name/description = {}", text);
-        return itemService.searchByDescription(text, from == null ? 0 : from, size == null ? 10 : size);
+        return itemService.searchByDescription(text, from, size);
     }
 
     @GetMapping
     public List<ItemOwnerDto> findAllByUserId(@RequestHeader(HEADER) long userId,
-                                              @RequestParam(value = "from", required = false) Integer from,
-                                              @RequestParam(value = "size", required = false) Integer size) {
+                                              @RequestParam(value = "from", required = false, defaultValue = "0") int from,
+                                              @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         log.info("Get items by user id = {}", userId);
-        return itemService.getItems(userId, from == null ? 0 : from, size == null ? 10 : size);
+        return itemService.getItems(userId, from, size);
     }
 
     @DeleteMapping("/{itemId}")

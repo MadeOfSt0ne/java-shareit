@@ -1,84 +1,119 @@
 package ru.practicum.shareit.user;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.test.annotation.DirtiesContext;
-import ru.practicum.shareit.exception.ValidationException;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.user.dto.UserDto;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@WebMvcTest(controllers = UserController.class)
 class UserControllerTest {
 
-	private final UserController userController;
+    @MockBean
+    private UserService userService;
 
-	@Autowired
-	UserControllerTest(UserController userController) {
-		this.userController = userController;
-	}
+    @Autowired
+    private final ObjectMapper mapper = new ObjectMapper();
 
-	private final UserDto user1 = UserDto.builder().name("test1").email("test1@test.com").build();
-	private final UserDto user2 = UserDto.builder().name("test2").email("test2@test.com").build();
-	private final UserDto user3 = UserDto.builder().name("test3").email("test3@test.com").build();
+    @Autowired
+    private MockMvc mvc;
 
+    private UserDto userDto;
 
-	@Test
-	void contextLoads() {
-		assertNotNull(userController);
-	}
+    @BeforeEach
+    void setUp() {
+        mapper.findAndRegisterModules();
 
-	@Test
-	void testCreateAndFindCorrectUser() {
-		final UserDto userDto = userController.addNewUser(user1);
-		assertEquals(userDto, userController.findById(userDto.getId()));
-	}
+        userDto = new UserDto(1L, "user", "user@gmail.com");
+    }
 
-	@Test
-	void testCreateUserWithoutEmail() {
-		assertThrows(ValidationException.class, () -> userController.addNewUser(user1.toBuilder().email("").build()));
-	}
+    @Test
+    void addNewUser() throws Exception {
+        when(userService.addNewUser(any()))
+                .thenReturn(userDto);
 
-	@Test
-	void testCreateUserWithExistingEmail() {
-		final UserDto userDto = userController.addNewUser(user1);
-		assertThrows(DataIntegrityViolationException.class,
-				() -> userController.addNewUser(user2.toBuilder().email("test1@test.com").build()));
-	}
+        mvc.perform(post("/users")
+                .content(mapper.writeValueAsString(userDto))
+                .characterEncoding(StandardCharsets.UTF_8)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
+                .andExpect(jsonPath("$.name", is(userDto.getName())))
+                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+    }
 
-	@Test
-	void testUpdateUserCorrect() {
-		final UserDto userDto = userController.addNewUser(user1);
-        userController.updateUser(user2, userDto.getId());
-		assertEquals(user2.getName(), userController.findById(userDto.getId()).getName());
-		assertEquals(user2.getEmail(), userController.findById(userDto.getId()).getEmail());
-	}
+    @Test
+    void updateUser() throws Exception {
+        when(userService.updateUser(any(), anyLong()))
+                .thenReturn(userDto);
 
-	@Test
-	void testUpdateUserExistingEmail() {
-		final UserDto userDto1 = userController.addNewUser(user1);
-		final UserDto userDto2 = userController.addNewUser(user2);
-		assertThrows(DataIntegrityViolationException.class,
-				() -> userController.updateUser(user3.toBuilder().email("test1@test.com").build(), userDto2.getId()));
-	}
+        mvc.perform(patch("/users/{userId}", userDto.getId())
+                        .content(mapper.writeValueAsString(userDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
+                .andExpect(jsonPath("$.name", is(userDto.getName())))
+                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+    }
 
-	@Test
-	void testGetAllUsers() {
-		final UserDto userDto1 = userController.addNewUser(user1);
-		final UserDto userDto2 = userController.addNewUser(user2);
-		assertEquals(List.of(userDto1, userDto2), userController.getAllUsers());
-	}
+    @Test
+    void getAllUsers() throws Exception {
+        when(userService.getUsers())
+                .thenReturn(List.of(userDto));
 
-	@Test
-	void testDeleteUser() {
-		final UserDto user = userController.addNewUser(user1);
-		final UserDto user1 = userController.addNewUser(user2);
-		userController.deleteUser(user1.getId());
-		assertEquals(List.of(user), userController.getAllUsers());
-	}
+        mvc.perform(get("/users")
+                        .content(mapper.writeValueAsString(userDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(userDto.getId()), Long.class))
+                .andExpect(jsonPath("$[0].name", is(userDto.getName())))
+                .andExpect(jsonPath("$[0].email", is(userDto.getEmail())));
+    }
+
+    @Test
+    void findById() throws Exception {
+        when(userService.findById(anyLong()))
+                .thenReturn(userDto);
+
+        mvc.perform(get("/users/{userId}", userDto.getId())
+                        .content(mapper.writeValueAsString(userDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
+                .andExpect(jsonPath("$.name", is(userDto.getName())))
+                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+    }
+
+    @Test
+    void deleteUser() throws Exception {
+        doNothing().when(userService).deleteUser(anyLong());
+
+        mvc.perform(delete("/users/{userId}", userDto.getId()))
+                .andExpect(status().isOk());
+    }
 }

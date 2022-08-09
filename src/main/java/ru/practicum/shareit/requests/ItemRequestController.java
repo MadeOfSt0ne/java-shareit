@@ -32,10 +32,10 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestWithAnswersDto> getAllRequests(@RequestHeader(HEADER) long userId,
-                                               @RequestParam(value = "from", required = false) Integer from,
-                                               @RequestParam(value = "size", required = false) Integer size) {
+                                       @RequestParam(value = "from", required = false, defaultValue = "0") int from,
+                                       @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         log.info("User {} get all requests with from = {} and size = {}", userId, from, size);
-        return requestService.getAllRequests(userId, from == null ? 0 : from, size == null ? 10 : size);
+        return requestService.getAllRequests(userId, from, size);
     }
 
     @GetMapping("/{requestId}")
