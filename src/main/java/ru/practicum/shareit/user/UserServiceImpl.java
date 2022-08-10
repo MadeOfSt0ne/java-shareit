@@ -2,7 +2,6 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.AlreadyExistsException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -34,10 +33,7 @@ public class UserServiceImpl implements UserService {
         if (userDto.getEmail() == null || !userDto.getEmail().contains("@")) {
             throw new ValidationException("Некорректный email!");
         }
-        if (userRepository.findByEmailContaining(userDto.getEmail()) != null) {
-            throw new AlreadyExistsException("Почта уже используется " + userDto.getEmail());
-        }
-        User user = userRepository.save(UserMapper.toUser(userDto, 0));
+        User user = userRepository.save(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }
 

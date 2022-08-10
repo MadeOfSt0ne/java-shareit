@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
 import ru.practicum.shareit.booking.dto.UpdateBookingDto;
 import ru.practicum.shareit.exception.ItemNotFoundException;
@@ -118,25 +119,35 @@ class BookingServiceTest {
         assertEquals(List.of(bookingDto1), bookingService.getAllFromUser(booker.getId(), "FUTURE", 0, 10));
     }
 
+    /**
+     * В тестах постмана возвращает пустой список, в интеграционных возвращает то, что нужно. Мистика.
+     */
     @Test
     void getAllFromUserByCurrentState() {
         User user = new User(2L, "name", "email@email.com");
         Item item = new Item(1L, "na", "de", true, user, new ArrayList<>(), null);
         Booking booking = repository.save(new Booking(1L, LocalDateTime.now().minusDays(1).withNano(0),
                 LocalDateTime.now().plusDays(1).withNano(0), item, user, Status.APPROVED));
+        final BookingDto dto = BookingMapper.toBookingDto(booking);
         assertNotNull(bookingService.findBooking(user.getId(), 1L));
         assertEquals(1, bookingService.getAllFromUser(user.getId(), "CURRENT", 0, 10).size());
+        assertEquals(List.of(dto), bookingService.getAllFromUser(user.getId(), "CURRENT", 0, 10));
     }
 
+    /**
+     * В тестах постмана возвращает пустой список, в интеграционных возвращает то, что нужно. Мистика.
+     */
     @Test
     void getAllFromUserByPastState() {
         User user = new User(2L, "name", "email@email.com");
         Item item = new Item(1L, "na", "de", true, user, new ArrayList<>(), null);
         Booking booking = repository.save(new Booking(1L, LocalDateTime.now().minusDays(1).withNano(0),
                 LocalDateTime.now().minusHours(1).withNano(0), item, user, Status.APPROVED));
+        final BookingDto dto = BookingMapper.toBookingDto(booking);
         assertEquals(booking.getStart(), repository.findById(1L).orElseThrow().getStart());
         assertNotNull(bookingService.findBooking(user.getId(), 1L));
         assertEquals(1, bookingService.getAllFromUser(user.getId(), "PAST", 0, 10).size());
+        assertEquals(List.of(dto), bookingService.getAllFromUser(user.getId(), "PAST", 0, 10));
     }
 
     @Test
@@ -169,6 +180,9 @@ class BookingServiceTest {
         assertThrows(ValidationException.class, () -> bookingService.getAllFromUser(booker.getId(), "DONE", 0, 10));
     }
 
+    /**
+     * В тестах постмана возвращает пустой список, в интеграционных возвращает то, что нужно. Мистика.
+     */
     @Test
     void getAllForItemsByCurrentState() {
         User user = new User(2L, "name", "email@email.com");
@@ -176,10 +190,15 @@ class BookingServiceTest {
         ItemDto itemDto1 = itemService.addNewItem(owner.getId(), itemDto);
         Booking booking = repository.save(new Booking(1L, LocalDateTime.now().minusDays(1).withNano(0),
                 LocalDateTime.now().plusDays(1).withNano(0), item, user, Status.APPROVED));
+        final BookingDto dto = BookingMapper.toBookingDto(booking);
         assertNotNull(bookingService.findBooking(2L, 1L));
         assertEquals(1, bookingService.getAllForItems(owner.getId(), "CURRENT", 0, 10).size());
+        assertEquals(List.of(dto), bookingService.getAllForItems(owner.getId(), "CURRENT", 0, 10));
     }
 
+    /**
+     * В тестах постмана возвращает пустой список, в интеграционных возвращает то, что нужно. Мистика.
+     */
     @Test
     void getAllForItemsByPastState() {
         User user = new User(2L, "name", "email@email.com");
@@ -187,8 +206,10 @@ class BookingServiceTest {
         ItemDto itemDto1 = itemService.addNewItem(owner.getId(), itemDto);
         Booking booking = repository.save(new Booking(1L, LocalDateTime.now().minusDays(1).withNano(0),
                 LocalDateTime.now().minusHours(1).withNano(0), item, user, Status.APPROVED));
+        final BookingDto dto = BookingMapper.toBookingDto(booking);
         assertNotNull(bookingService.findBooking(2L, 1L));
         assertEquals(1, bookingService.getAllForItems(owner.getId(), "PAST", 0, 10).size());
+        assertEquals(List.of(dto), bookingService.getAllForItems(owner.getId(), "PAST", 0, 10));
     }
 
     @Test
