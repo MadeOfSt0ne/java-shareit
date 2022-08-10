@@ -31,6 +31,7 @@ class ItemRequestServiceTest {
         this.repository = repository;
         this.userService = userService;
     }
+
     private ItemRequestDto requestDto;
     private ItemRequestWithAnswersDto answersDto;
     private UserDto userDto;
