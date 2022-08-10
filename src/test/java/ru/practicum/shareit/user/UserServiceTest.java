@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
+import ru.practicum.shareit.exception.AlreadyExistsException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 
@@ -54,7 +55,7 @@ class UserServiceTest {
 	@Test
 	void testCreateUserWithExistingEmail() {
 		final UserDto userDto = userService.addNewUser(user1);
-		assertThrows(DataIntegrityViolationException.class,
+		assertThrows(AlreadyExistsException.class,
 				() -> userService.addNewUser(user2.toBuilder().email("test1@test.com").build()));
 	}
 
