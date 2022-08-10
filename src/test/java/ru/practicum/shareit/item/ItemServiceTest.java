@@ -12,7 +12,7 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.requests.ItemRequestService;
 import ru.practicum.shareit.requests.dto.ItemRequestDto;
-import ru.practicum.shareit.user.UserServiceImpl;
+import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.time.LocalDateTime;
@@ -25,16 +25,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ItemServiceTest {
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
-    private final ItemServiceImpl itemService;
+    private final ItemService itemService;
 
     private final BookingService bookingService;
 
     private final ItemRequestService itemRequestService;
 
     @Autowired
-    ItemServiceTest(UserServiceImpl userService, ItemServiceImpl itemService, BookingService bookingService,
+    ItemServiceTest(UserService userService, ItemService itemService, BookingService bookingService,
                     ItemRequestService itemRequestService) {
         this.userService = userService;
         this.itemService = itemService;
@@ -118,6 +118,7 @@ public class ItemServiceTest {
         final UserDto booker = userService.addNewUser(user1.toBuilder().name("booker").email("user2@gmail.com").build());
         final ItemDto itemDto = itemService.addNewItem(owner.getId(), item1);
         bookingService.addNewBooking(booker.getId(), booking);
+        // Добавил 5 сек ожидания чтобы аренда завершилась
         TimeUnit.SECONDS.sleep(5);
         CommentDto commentDto = new CommentDto(1L, "comment", booker.getName(), LocalDateTime.of(2022, 8, 8, 8, 8, 8));
         itemService.addComment(booker.getId(), itemDto.getId(), commentDto);

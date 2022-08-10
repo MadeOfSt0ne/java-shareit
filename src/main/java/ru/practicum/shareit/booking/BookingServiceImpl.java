@@ -27,7 +27,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
-    private static final LocalDateTime NOW = LocalDateTime.now();
+    private static final LocalDateTime NOW = LocalDateTime.now().withNano(0);
 
     /**
      * Добавление нового бронирования
@@ -37,8 +37,8 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     public BookingDto addNewBooking(long userId, NewBookingDto booking) {
-        if (booking.getEnd().isBefore(booking.getStart()) || booking.getEnd().isBefore(LocalDateTime.now())
-            || booking.getStart().isBefore(LocalDateTime.now())) {
+        if (booking.getEnd().isBefore(booking.getStart()) || booking.getEnd().isBefore(NOW)
+            || booking.getStart().isBefore(NOW)) {
             throw new ValidationException("Некорректное время окончания бронирования");
         }
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
@@ -71,8 +71,8 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getStatus() == Status.APPROVED) {
             throw new ValidationException("Статус уже изменен");
         }
-        if (userId != itemRepository.findById(booking.getItem().getId())
-                .orElseThrow(() -> new ItemNotFoundException("Предмет не найден")).getOwner().getId()) {
+        User owner = itemRepository.findById(booking.getItem().getId()).orElseThrow().getOwner();
+        if (userId != owner.getId()) {
             throw new UserNotFoundException("Доступ запрещен");
         }
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);

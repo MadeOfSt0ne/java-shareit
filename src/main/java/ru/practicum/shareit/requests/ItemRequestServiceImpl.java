@@ -34,7 +34,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public ItemRequestDto addNewItemRequest(long userId, ItemRequestDto itemRequestDto) {
         User user = userRepository.findById(userId).orElseThrow();
-        if (itemRequestDto.getDescription().isBlank()) {
+        if (itemRequestDto.getDescription() == null || itemRequestDto.getDescription().isBlank()) {
             throw new ValidationException("Пустое описание");
         }
         ItemRequest request = requestRepository.save(ItemRequestMapper.toItemRequest(user, itemRequestDto));
