@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
         if (userDto.getEmail() == null || !userDto.getEmail().contains("@")) {
             throw new ValidationException("Некорректный email!");
         }
-        if(userRepository.findByEmailContaining(userDto.getEmail()) != null) {
+        if (userRepository.findByEmailContaining(userDto.getEmail()) != null) {
             throw new AlreadyExistsException("Почта уже используется " + userDto.getEmail());
         }
         User user = userRepository.save(UserMapper.toUser(userDto, 0));
