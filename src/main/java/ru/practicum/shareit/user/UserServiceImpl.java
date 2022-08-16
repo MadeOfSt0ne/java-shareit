@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
         if (userDto.getEmail() == null || !userDto.getEmail().contains("@")) {
             throw new ValidationException("Некорректный email!");
         }
-        User user = userRepository.save(UserMapper.toUser(userDto, 0));
+        User user = userRepository.save(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }
 

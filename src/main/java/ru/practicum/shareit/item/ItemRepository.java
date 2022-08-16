@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -11,7 +13,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
      *
      * @param userId id пользователя
      */
-    List<Item> findByOwnerId(long userId);
+    Page<Item> findByOwnerId(long userId, Pageable pageable);
 
     /**
      * Поиск предмета по фрагменту в названии и описании. Available = true
@@ -19,5 +21,14 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
      * @param name текст для поиска
      * @param description текст для поиска
      */
-    List<Item> searchAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(String name, String description);
+    Page<Item> searchAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
+            String name, String description, Pageable pageable);
+
+    /**
+     * Поиск предметов, подходящих под запрос
+     *
+     * @param requestId id запроса
+     */
+    List<Item> searchAllByRequestId(long requestId);
 }
+

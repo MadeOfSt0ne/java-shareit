@@ -1,19 +1,17 @@
 package ru.practicum.shareit.item;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comments")
 @Getter
 @Setter
 @ToString
+@AllArgsConstructor
 @RequiredArgsConstructor
 public class Comment {
     @Id
@@ -28,5 +26,5 @@ public class Comment {
     @ManyToOne
     private User author;
     @Column(name = "created")
-    private Instant created = Instant.now();
+    private LocalDateTime created;
 }

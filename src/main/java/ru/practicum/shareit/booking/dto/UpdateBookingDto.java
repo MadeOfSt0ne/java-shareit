@@ -1,9 +1,6 @@
 package ru.practicum.shareit.booking.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.practicum.shareit.booking.Status;
 
 @Data
@@ -15,7 +12,6 @@ public class UpdateBookingDto {
     private Status status;
     private User booker;
     private Item item;
-    private String itemName;
 
     @Data
     @AllArgsConstructor

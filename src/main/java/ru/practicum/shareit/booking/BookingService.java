@@ -26,10 +26,10 @@ public interface BookingService {
     /**
      * Получение списка всех бронирований пользователя
      */
-    List<BookingDto> getAllFromUser(long userId, String state);
+    List<BookingDto> getAllFromUser(long userId, String state, int from, int size);
 
     /**
      * Получние списка бронирования для всех предметов пользователя
      */
-    List<BookingDto> getAllForItems(long userId, String state);
+    List<BookingDto> getAllForItems(long userId, String state, int from, int size);
 }

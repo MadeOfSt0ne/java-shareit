@@ -29,5 +29,7 @@ public class Item {
     private User owner;
     @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     @ToString.Exclude
-    List<Comment> comments;
+    private List<Comment> comments;
+    @Column(name = "request_id")
+    private Long requestId;
 }

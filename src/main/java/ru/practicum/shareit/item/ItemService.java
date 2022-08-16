@@ -11,7 +11,7 @@ public interface ItemService {
     /**
      * Получение списка предметов пользователя
      */
-    List<ItemOwnerDto> getItems(long userId);
+    List<ItemOwnerDto> getItems(long userId, int from, int size);
 
     /**
      * Добавление предмета
@@ -26,7 +26,7 @@ public interface ItemService {
     /**
      * Поиск предмета по описанию
      */
-    List<ItemDto> searchByDescription(String text);
+    List<ItemDto> searchByDescription(String text, int from, int size);
 
     /**
      * Поиск предмета по id
@@ -47,4 +47,9 @@ public interface ItemService {
      * Получение списка отзывов предмета
      */
     List<CommentDto> getComments(long itemId);
+
+    /**
+     * Получение списка предметов, подходящих под запрос
+     */
+    List<ItemDto> getItemsForRequest(long requestId);
 }

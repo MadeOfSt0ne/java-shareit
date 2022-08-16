@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
@@ -8,54 +10,61 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     /**
-     * Получение списка бронирований пользователя с учетом статуса
+     * Получение страницы бронирований пользователя с учетом статуса
      */
-    List<Booking> findByBookerIdAndStatusOrderByStartDesc(long booker, Status status);
+    Page<Booking> findByBookerIdAndStatusOrderByStartDesc(long booker, Status status, Pageable pageable);
 
     /**
-     * Получение списка бронирований пользователя
+     * Получение страницы бронирований пользователя
      */
-    List<Booking> findByBookerIdOrderByStartDesc(long booker);
+    Page<Booking> findByBookerIdOrderByStartDesc(long booker, Pageable pageable);
 
     /**
-     * Получение списка будущих бронирований пользователя
+     * Получение страницы будущих бронирований пользователя
      */
-    List<Booking> findByBookerIdAndStartAfterOrderByStartDesc(long booker, LocalDateTime start);
+    Page<Booking> findByBookerIdAndStartAfterOrderByStartDesc(long booker, LocalDateTime start, Pageable pageable);
 
     /**
-     * Получение списка прошедших бронирований пользователя
+     * Получение страницы прошедших бронирований пользователя
      */
-    List<Booking> findByBookerIdAndEndBeforeOrderByStartDesc(long booker, LocalDateTime end);
+    Page<Booking> findByBookerIdAndEndBeforeOrderByStartDesc(long booker, LocalDateTime end, Pageable pageable);
 
     /**
-     * Получений списка текущих бронирований пользователя
+     * Получение списка прошедших бронирований пользователя для проверки, что он брал вещь в аренду
      */
-    List<Booking> findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(long booker, LocalDateTime start, LocalDateTime end);
+    List<Booking> findByBookerIdAndEndBefore(long booker, LocalDateTime end);
 
     /**
-     * Получение списка бронирований предметов пользователя с учетом статуса
+     * Получений страницы текущих бронирований пользователя
      */
-    List<Booking> findByItemOwnerIdAndStatusOrderByStartDesc(long owner, Status status);
+    Page<Booking> findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
+            long booker, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
     /**
-     * Получение списка бронирований предметов пользователя
+     * Получение страницы бронирований предметов пользователя с учетом статуса
      */
-    List<Booking> findByItemOwnerIdOrderByStartDesc(long owner);
+    Page<Booking> findByItemOwnerIdAndStatusOrderByStartDesc(long owner, Status status, Pageable pageable);
 
     /**
-     * Получение списка будущих бронирований предметов пользователя
+     * Получение страницы бронирований предметов пользователя
      */
-    List<Booking> findByItemOwnerIdAndStartAfterOrderByStartDesc(long owner, LocalDateTime localDateTime);
+    Page<Booking> findByItemOwnerIdOrderByStartDesc(long owner, Pageable pageable);
 
     /**
-     * Получение списка прошедших бронирований предметов пользователя
+     * Получение страницы будущих бронирований предметов пользователя
      */
-    List<Booking> findByItemOwnerIdAndEndBeforeOrderByStartDesc(long owner, LocalDateTime localDateTime);
+    Page<Booking> findByItemOwnerIdAndStartAfterOrderByStartDesc(long owner, LocalDateTime localDateTime, Pageable pageable);
 
     /**
-     * Получений списка текущих бронирований предметов пользователя
+     * Получение страницы прошедших бронирований предметов пользователя
      */
-    List<Booking> findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(long owner, LocalDateTime start, LocalDateTime end);
+    Page<Booking> findByItemOwnerIdAndEndBeforeOrderByStartDesc(long owner, LocalDateTime localDateTime, Pageable pageable);
+
+    /**
+     * Получений страницы текущих бронирований предметов пользователя
+     */
+    Page<Booking> findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
+            long owner, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
     /**
      * Получние последнего бронирования
