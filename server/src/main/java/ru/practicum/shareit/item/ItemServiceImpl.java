@@ -57,10 +57,10 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public ItemDto addNewItem(long userId, ItemDto itemDto) {
-        if (itemDto.getName().isEmpty() || itemDto.getDescription() == null || itemDto.getDescription().isEmpty()
+        /*if (itemDto.getName().isEmpty() || itemDto.getDescription() == null || itemDto.getDescription().isEmpty()
                 || itemDto.getAvailable() == null) {
             throw new ValidationException("Неверные данные!");
-        }
+        }*/
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
         Item item = itemRepository.save(ItemMapper.toItem(itemDto, user));
         return ItemMapper.toItemDto(item);
@@ -173,9 +173,9 @@ public class ItemServiceImpl implements ItemService {
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new ItemNotFoundException("Предмет не найден"));
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
-        if (commentDto.getText().isEmpty()) {
+        /*if (commentDto.getText().isEmpty()) {
             throw new ValidationException("Пустой комментарий");
-        }
+        }*/
         // проверка что пользователь брал вещь в аренду
         bookingRepository.findByBookerIdAndEndBefore(userId, LocalDateTime.now()).stream()
                 .filter(booking -> booking.getItem().getId() == itemId)

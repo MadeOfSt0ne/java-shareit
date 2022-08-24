@@ -37,10 +37,10 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     public BookingDto addNewBooking(long userId, NewBookingDto booking) {
-        if (booking.getEnd().isBefore(booking.getStart()) || booking.getEnd().isBefore(NOW)
+        /*if (booking.getEnd().isBefore(booking.getStart()) || booking.getEnd().isBefore(NOW)
             || booking.getStart().isBefore(NOW)) {
             throw new ValidationException("Некорректное время окончания бронирования");
-        }
+        }*/
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
         Item item = itemRepository.findById(booking.getItemId())
                 .orElseThrow(() -> new ItemNotFoundException("Предмет не найден"));
@@ -63,9 +63,9 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     public UpdateBookingDto updateBooking(long userId, long bookingId, Boolean approved) {
-        if (approved == null) {
+        /*if (approved == null) {
             throw new ValidationException("Approved не может быть пустым");
-        }
+        }*/
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ItemNotFoundException("Бронирование не найдено"));
         if (booking.getStatus() == Status.APPROVED) {

@@ -30,9 +30,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserDto addNewUser(UserDto userDto) {
-        if (userDto.getEmail() == null || !userDto.getEmail().contains("@")) {
+        /*if (userDto.getEmail() == null || !userDto.getEmail().contains("@")) {
             throw new ValidationException("Некорректный email!");
-        }
+        }*/
         User user = userRepository.save(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }
