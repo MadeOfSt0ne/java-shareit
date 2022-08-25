@@ -7,7 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.BookingService;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.requests.ItemRequestService;
@@ -19,7 +18,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -70,20 +70,6 @@ public class ItemServiceTest {
         final UserDto userDto = userService.addNewUser(user1);
         final ItemDto itemDto = itemService.addNewItem(userDto.getId(), item1);
         assertEquals(1, itemService.findById(userDto.getId(), itemDto.getId()).getId());
-    }
-
-    @Test
-    void testCreateBlankName() {
-        final UserDto userDto = userService.addNewUser(user1);
-        assertThrows(ValidationException.class, () ->
-                itemService.addNewItem(userDto.getId(), item1.toBuilder().name("").build()));
-    }
-
-    @Test
-    void testCreateBlankDescription() {
-        final UserDto userDto = userService.addNewUser(user1);
-        assertThrows(ValidationException.class, () ->
-                itemService.addNewItem(userDto.getId(), item1.toBuilder().description("").build()));
     }
 
     @Test

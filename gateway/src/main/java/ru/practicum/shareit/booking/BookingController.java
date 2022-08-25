@@ -9,9 +9,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
 import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.exception.ValidationException;
 
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
@@ -28,7 +28,7 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<Object> addBooking(@RequestHeader(HEADER) long userId,
                                              @RequestBody @Valid NewBookingDto newBookingDto) {
-        log.info("Gateway: Creating booking {}, userId={}", newBookingDto, userId);
+        log.info("GATEWAY: Creating booking {}, userId={}", newBookingDto, userId);
         if (newBookingDto.getEnd().isBefore(newBookingDto.getStart())) {
             throw new ValidationException("Время начала позже времени окончания!");
         }
@@ -38,7 +38,7 @@ public class BookingController {
     @PatchMapping("/{bookingId}")
     public ResponseEntity<Object> update(@RequestHeader(HEADER) long userId,
                                          @RequestParam Boolean approved, @PathVariable Long bookingId) {
-        log.info("Gateway: Patch booking {}, userId={}, approved={}", bookingId, userId, approved);
+        log.info("GATEWAY: Patch booking {}, userId={}, approved={}", bookingId, userId, approved);
         if (approved == null) {
             throw new ValidationException("Approved не может быть пустым!");
         }
@@ -48,7 +48,7 @@ public class BookingController {
     @GetMapping("/{bookingId}")
     public ResponseEntity<Object> getBooking(@RequestHeader(HEADER) long userId,
                                              @PathVariable Long bookingId) {
-        log.info("Gateway: Get booking {}, userId={}", bookingId, userId);
+        log.info("GATEWAY: Get booking {}, userId={}", bookingId, userId);
         return bookingClient.getBooking(userId, bookingId);
     }
 
@@ -59,7 +59,7 @@ public class BookingController {
                                           @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
         BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
-        log.info("Gateway: Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
+        log.info("GATEWAY: Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
         return bookingClient.getBookings(userId, state, from, size);
     }
 
@@ -70,7 +70,7 @@ public class BookingController {
                                           @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
         BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
-        log.info("Gateway: Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
+        log.info("GATEWAY: Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
         return bookingClient.getBookingsForItems(userId, state, from, size);
     }
 

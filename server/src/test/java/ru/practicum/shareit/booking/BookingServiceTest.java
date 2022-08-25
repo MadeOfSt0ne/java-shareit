@@ -70,20 +70,6 @@ class BookingServiceTest {
     }
 
     @Test
-    void addNewBookingInvalid() {
-        assertThrows(ValidationException.class, () -> bookingService.addNewBooking(
-                booker.getId(), newBookingDto.toBuilder().start(LocalDateTime.now().minusDays(2)).build()));
-        assertThrows(ValidationException.class, () -> bookingService.addNewBooking(
-                booker.getId(), newBookingDto.toBuilder().start(LocalDateTime.now().plusDays(2))
-                        .end(LocalDateTime.now().plusDays(1)).build()));
-        assertThrows(UserNotFoundException.class, () -> bookingService.addNewBooking(10L, newBookingDto));
-        assertThrows(ItemNotFoundException.class, () -> bookingService.addNewBooking(
-                booker.getId(), newBookingDto.toBuilder().itemId(5L).build()));
-        itemService.updateItem(owner.getId(), 1L, itemDto.toBuilder().available(false).build());
-        assertThrows(ValidationException.class, () -> bookingService.addNewBooking(booker.getId(), newBookingDto));
-    }
-
-    @Test
     void updateBooking() {
         final BookingDto bookingDto1 = bookingService.addNewBooking(booker.getId(), newBookingDto);
         final UpdateBookingDto updateBookingDto1 = bookingService.updateBooking(owner.getId(), bookingDto1.getId(), true);
@@ -93,8 +79,6 @@ class BookingServiceTest {
     @Test
     void updateBookingInvalid() {
         bookingService.addNewBooking(booker.getId(), newBookingDto);
-        assertThrows(ValidationException.class, () -> bookingService.updateBooking(owner.getId(), newBookingDto.getId(),
-                null));
         assertThrows(ItemNotFoundException.class, () -> bookingService.updateBooking(owner.getId(), 5L, true));
         assertThrows(UserNotFoundException.class, () -> bookingService.updateBooking(5L,
                 newBookingDto.getId(), true));

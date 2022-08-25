@@ -20,20 +20,20 @@ public class BookingController {
 
     @PostMapping
     public BookingDto addNewBooking(@RequestHeader(HEADER) long userId, @RequestBody NewBookingDto bookingDto) {
-        log.info("User {} create booking {}", userId, bookingDto);
+        log.info("SERVER: User {} create booking {}", userId, bookingDto);
         return bookingService.addNewBooking(userId, bookingDto);
     }
 
     @PatchMapping("/{bookingId}")
     public UpdateBookingDto updateBooking(@RequestHeader(HEADER) long userId,
                                           @RequestParam Boolean approved, @PathVariable long bookingId) {
-        log.info("User {} updated booking {} set approval = {}", userId, bookingId, approved);
+        log.info("SERVER: User {} updated booking {} set approval = {}", userId, bookingId, approved);
         return bookingService.updateBooking(userId, bookingId, approved);
     }
 
     @GetMapping("/{bookingId}")
     public BookingDto getBooking(@RequestHeader(HEADER) long userId, @PathVariable long bookingId) {
-        log.info("User {} get booking id = {}", userId, bookingId);
+        log.info("SERVER: User {} get booking id = {}", userId, bookingId);
         return bookingService.findBooking(userId, bookingId);
     }
 
@@ -42,7 +42,7 @@ public class BookingController {
                             @RequestParam(value = "state", required = false, defaultValue = "ALL") String state,
                             @RequestParam(value = "from", required = false, defaultValue = "0") int from,
                             @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        log.info("User {} get own bookings state = {}", userId, state);
+        log.info("SERVER: User {} get own bookings state = {}", userId, state);
         return bookingService.getAllFromUser(userId, state, from, size);
     }
 
@@ -51,7 +51,7 @@ public class BookingController {
                             @RequestParam(value = "state", required = false, defaultValue = "ALL") String state,
                             @RequestParam(value = "from", required = false, defaultValue = "0") int from,
                             @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        log.info("User {} get bookings for items state = {}", userId, state);
+        log.info("SERVER: User {} get bookings for items state = {}", userId, state);
         return bookingService.getAllForItems(userId, state, from, size);
     }
 

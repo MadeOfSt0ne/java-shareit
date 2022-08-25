@@ -20,13 +20,13 @@ public class ItemRequestController {
 
     @PostMapping
     public ItemRequestDto addNewItemRequest(@RequestHeader(HEADER) long userId, @RequestBody ItemRequestDto requestDto) {
-        log.info("User {} create new ItemRequest {}", userId, requestDto);
+        log.info("SERVER: User {} create new ItemRequest {}", userId, requestDto);
         return requestService.addNewItemRequest(userId, requestDto);
     }
 
     @GetMapping
     public List<ItemRequestWithAnswersDto> getOwnRequests(@RequestHeader(HEADER) long userId) {
-        log.info("User {} get own requests", userId);
+        log.info("SERVER: User {} get own requests", userId);
         return requestService.getOwnRequests(userId);
     }
 
@@ -34,13 +34,13 @@ public class ItemRequestController {
     public List<ItemRequestWithAnswersDto> getAllRequests(@RequestHeader(HEADER) long userId,
                                        @RequestParam(value = "from", required = false, defaultValue = "0") int from,
                                        @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        log.info("User {} get all requests with from = {} and size = {}", userId, from, size);
+        log.info("SERVER: User {} get all requests with from = {} and size = {}", userId, from, size);
         return requestService.getAllRequests(userId, from, size);
     }
 
     @GetMapping("/{requestId}")
     public ItemRequestWithAnswersDto getRequest(@RequestHeader(HEADER) long userId, @PathVariable long requestId) {
-        log.info("User {} get request {}", userId, requestId);
+        log.info("SERVER: User {} get request {}", userId, requestId);
         return requestService.getRequest(userId, requestId);
     }
 }

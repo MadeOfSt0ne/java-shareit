@@ -20,20 +20,20 @@ public class ItemController {
 
     @PostMapping
     public ItemDto addNewItem(@RequestHeader(HEADER) long userId, @RequestBody ItemDto itemDto) {
-        log.info("User {} create item {}", userId, itemDto);
+        log.info("SERVER: User {} create item {}", userId, itemDto);
         return itemService.addNewItem(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestHeader(HEADER) long userId, @RequestBody ItemDto itemDto,
                               @PathVariable long itemId) {
-        log.info("User {} update item {} with {}", userId, itemId, itemDto);
+        log.info("SERVER: User {} update item {} with {}", userId, itemId, itemDto);
         return itemService.updateItem(userId, itemId, itemDto);
     }
 
     @GetMapping("/{itemId}")
     public ItemOwnerDto findById(@RequestHeader(HEADER) long userId, @PathVariable long itemId) {
-        log.info("Get item id = {}", itemId);
+        log.info("SERVER: Get item id = {}", itemId);
         return itemService.findById(userId, itemId);
     }
 
@@ -41,7 +41,7 @@ public class ItemController {
     public List<ItemDto> findByDescription(@RequestParam(value = "text") String text,
                                            @RequestParam(value = "from", required = false, defaultValue = "0") int from,
                                            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        log.info("Get item name/description = {}", text);
+        log.info("SERVER: Get item name/description = {}", text);
         return itemService.searchByDescription(text, from, size);
     }
 
@@ -49,20 +49,20 @@ public class ItemController {
     public List<ItemOwnerDto> findAllByUserId(@RequestHeader(HEADER) long userId,
                                               @RequestParam(value = "from", required = false, defaultValue = "0") int from,
                                               @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        log.info("Get items by user id = {}", userId);
+        log.info("SERVER: Get items by user id = {}", userId);
         return itemService.getItems(userId, from, size);
     }
 
     @DeleteMapping("/{itemId}")
     public void deleteItem(@RequestHeader(HEADER) long userId, @PathVariable long itemId) {
-        log.info("Delete item id = {}", itemId);
+        log.info("SERVER: Delete item id = {}", itemId);
         itemService.deleteItem(userId, itemId);
     }
 
     @PostMapping("/{itemId}/comment")
     public CommentDto addComment(@RequestHeader(HEADER) long userId, @PathVariable long itemId,
                                  @RequestBody CommentDto commentDto) {
-        log.info("User {} adds comment {} to item {}", userId, commentDto, itemId);
+        log.info("SERVER: User {} adds comment {} to item {}", userId, commentDto, itemId);
         return itemService.addComment(userId, itemId, commentDto);
     }
 }

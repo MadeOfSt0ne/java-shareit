@@ -16,31 +16,31 @@ public class UserController {
 
     @PostMapping
     public UserDto addNewUser(@RequestBody UserDto userDto) {
-        log.info("Add new user {}", userDto);
+        log.info("SERVER: Add new user {}", userDto);
         return userService.addNewUser(userDto);
     }
 
     @PatchMapping("/{userId}")
     public UserDto updateUser(@RequestBody UserDto userDto, @PathVariable long userId) {
-        log.info("Update user id = {}, new user = {}", userId, userDto);
+        log.info("SERVER: Update user id = {}, new user = {}", userId, userDto);
         return userService.updateUser(userDto, userId);
     }
 
     @GetMapping
     public List<UserDto> getAllUsers() {
-        log.info("Total users = {}", userService.getUsers().size());
+        log.info("SERVER: Total users = {}", userService.getUsers().size());
         return userService.getUsers();
     }
 
     @GetMapping("/{userId}")
     public UserDto findById(@PathVariable long userId) {
-        log.info("Get user id = {}", userId);
+        log.info("SERVER: Get user id = {}", userId);
         return userService.findById(userId);
     }
 
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable long userId) {
-        log.info("Delete user id = {}", userId);
+        log.info("SERVER: Delete user id = {}", userId);
         userService.deleteUser(userId);
     }
 }

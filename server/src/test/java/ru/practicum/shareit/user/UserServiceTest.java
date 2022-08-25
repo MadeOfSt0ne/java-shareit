@@ -4,14 +4,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -47,31 +46,11 @@ class UserServiceTest {
 	}
 
 	@Test
-	void testCreateUserWithoutEmail() {
-		assertThrows(ValidationException.class, () -> userService.addNewUser(user1.toBuilder().email("").build()));
-	}
-
-	@Test
-	void testCreateUserWithExistingEmail() {
-		final UserDto userDto = userService.addNewUser(user1);
-		assertThrows(DataIntegrityViolationException.class,
-				() -> userService.addNewUser(user2.toBuilder().email("test1@test.com").build()));
-	}
-
-	@Test
 	void testUpdateUserCorrect() {
 		final UserDto userDto = userService.addNewUser(user1);
         userService.updateUser(user2, userDto.getId());
 		assertEquals(user2.getName(), userService.findById(userDto.getId()).getName());
 		assertEquals(user2.getEmail(), userService.findById(userDto.getId()).getEmail());
-	}
-
-	@Test
-	void testUpdateUserExistingEmail() {
-		final UserDto userDto1 = userService.addNewUser(user1);
-		final UserDto userDto2 = userService.addNewUser(user2);
-		assertThrows(DataIntegrityViolationException.class,
-				() -> userService.updateUser(user3.toBuilder().email("test1@test.com").build(), userDto2.getId()));
 	}
 
 	@Test
