@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.requests.dto.ItemRequestDto;
 import ru.practicum.shareit.requests.dto.ItemRequestWithAnswersDto;
 import ru.practicum.shareit.user.UserService;
@@ -60,12 +59,6 @@ class ItemRequestServiceTest {
     @Test
     void addNewItemRequestWithNotExistingUser() {
         assertThrows(NoSuchElementException.class, () -> requestService.addNewItemRequest(3L, requestDto));
-    }
-
-    @Test
-    void addNewItemRequestWithBlankDescription() {
-        final ItemRequestDto requestDto1 = new ItemRequestDto(1L, null, 1L, LocalDateTime.now());
-        assertThrows(ValidationException.class, () -> requestService.addNewItemRequest(1L, requestDto1));
     }
 
     @Test

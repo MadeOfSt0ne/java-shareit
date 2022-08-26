@@ -2,21 +2,19 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.NewBookingDto;
 import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.booking.dto.NewBookingDto;
 import ru.practicum.shareit.exception.ValidationException;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.time.LocalDateTime;
 
-@Controller
-@RequestMapping(path = "/bookings")
+@RestController
+@RequestMapping("/bookings")
 @RequiredArgsConstructor
 @Slf4j
 @Validated
@@ -27,9 +25,11 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<Object> addBooking(@RequestHeader(HEADER) long userId,
-                                             @RequestBody @Valid NewBookingDto newBookingDto) {
+                                             @RequestBody NewBookingDto newBookingDto) {
         log.info("GATEWAY: Creating booking {}, userId={}", newBookingDto, userId);
-        if (newBookingDto.getEnd().isBefore(newBookingDto.getStart())) {
+        if (newBookingDto.getEnd().isBefore(newBookingDto.getStart()) ||
+               newBookingDto.getStart().isBefore(LocalDateTime.now()) ||
+               newBookingDto.getEnd().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Время начала позже времени окончания!");
         }
         return bookingClient.bookItem(userId, newBookingDto);

@@ -15,7 +15,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final ValidationException e) {
-        return new ErrorResponse(e.getMessage());
+        return new ErrorResponse("Ошибка валидации");
     }
 
     @ExceptionHandler
@@ -39,18 +39,18 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNoSuchElementException(final NoSuchElementException e) {
-        return new ErrorResponse("Not found");
+        return new ErrorResponse("NOT FOUND");
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleAccessDeniedException(final AccessDeniedException e) {
-        return new ErrorResponse("Forbidden");
+        return new ErrorResponse("FORBIDDEN");
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleDataIntegrityViolationException(final DataIntegrityViolationException e) {
-        return new ErrorResponse("CONFLICT");
+        return new ErrorResponse("SERVER: CONFLICT");
     }
 }

@@ -3,16 +3,15 @@ package ru.practicum.shareit.request;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
-@Controller
+@RestController
 @RequestMapping("/requests")
 @RequiredArgsConstructor
 @Slf4j
@@ -20,12 +19,14 @@ import javax.validation.constraints.PositiveOrZero;
 public class RequestController {
 
     private static final String HEADER = "X-Sharer-User-Id";
-
     private final RequestClient requestClient;
 
     @PostMapping
     public ResponseEntity<Object> addNewItemRequest(@RequestHeader(HEADER) long userId,
-                                                    @RequestBody @Valid ItemRequestDto requestDto) {
+                                                    @RequestBody ItemRequestDto requestDto) {
+        if (requestDto.getDescription() == null || requestDto.getDescription().isBlank()) {
+            throw new ValidationException("Пустое описание");
+        }
         log.info("GATEWAY: User {} create new ItemRequest {}", userId, requestDto);
         return requestClient.addRequest(userId, requestDto);
     }

@@ -3,17 +3,16 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
-import javax.validation.Valid;
+import javax.validation.ValidationException;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
-@Controller
+@RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
 @Slf4j
@@ -24,13 +23,17 @@ public class ItemController {
     private final ItemClient itemClient;
 
     @PostMapping
-    public ResponseEntity<Object> addNewItem(@RequestHeader(HEADER) long userId, @RequestBody @Valid ItemDto itemDto) {
+    public ResponseEntity<Object> addItem(@RequestHeader(HEADER) long userId, @RequestBody ItemDto itemDto) {
+        if (itemDto.getName().isEmpty() || itemDto.getDescription() == null || itemDto.getDescription().isEmpty()
+                || itemDto.getAvailable() == null) {
+            throw new ValidationException("GATEWAY: Невалидные данные");
+        }
         log.info("GATEWAY: User {} create item {}", userId, itemDto);
         return itemClient.addItem(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<Object> updateItem(@RequestHeader(HEADER) long userId, @RequestBody @Valid ItemDto itemDto,
+    public ResponseEntity<Object> updateItem(@RequestHeader(HEADER) long userId, @RequestBody ItemDto itemDto,
                                  @PathVariable long itemId) {
         log.info("GATEWAY: User {} update item {} with {}", userId, itemId, itemDto);
         return itemClient.update(userId, itemId, itemDto);
@@ -66,8 +69,11 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<Object> addComment(@RequestHeader(HEADER) long userId, @PathVariable long itemId,
-                                 @RequestBody @Valid CommentDto commentDto) {
+                                 @RequestBody CommentDto commentDto) {
         log.info("GATEWAY: User {} adds comment {} to item {}", userId, commentDto, itemId);
+        if (commentDto.getText().isBlank()) {
+            throw new ValidationException("Empty comment");
+        }
         return itemClient.addComment(userId, itemId, commentDto);
     }
 }
