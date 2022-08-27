@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 import javax.validation.constraints.Positive;
@@ -20,13 +19,12 @@ public class RequestController {
 
     private static final String HEADER = "X-Sharer-User-Id";
     private final RequestClient requestClient;
+    private final RequestValidation validation;
 
     @PostMapping
     public ResponseEntity<Object> addNewItemRequest(@RequestHeader(HEADER) long userId,
                                                     @RequestBody ItemRequestDto requestDto) {
-        if (requestDto.getDescription() == null || requestDto.getDescription().isBlank()) {
-            throw new ValidationException("Пустое описание");
-        }
+        validation.validate(requestDto);
         log.info("GATEWAY: User {} create new ItemRequest {}", userId, requestDto);
         return requestClient.addRequest(userId, requestDto);
     }

@@ -7,11 +7,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
-import ru.practicum.shareit.exception.ValidationException;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/bookings")
@@ -22,16 +20,13 @@ public class BookingController {
 
     private static final String HEADER = "X-Sharer-User-Id";
     private final BookingClient bookingClient;
+    private final BookingValidation validation;
 
     @PostMapping
     public ResponseEntity<Object> addBooking(@RequestHeader(HEADER) long userId,
                                              @RequestBody NewBookingDto newBookingDto) {
         log.info("GATEWAY: Creating booking {}, userId={}", newBookingDto, userId);
-        if (newBookingDto.getEnd().isBefore(newBookingDto.getStart()) ||
-               newBookingDto.getStart().isBefore(LocalDateTime.now()) ||
-               newBookingDto.getEnd().isBefore(LocalDateTime.now())) {
-            throw new ValidationException("Время начала позже времени окончания!");
-        }
+        validation.validate(newBookingDto);
         return bookingClient.bookItem(userId, newBookingDto);
     }
 
@@ -39,9 +34,7 @@ public class BookingController {
     public ResponseEntity<Object> update(@RequestHeader(HEADER) long userId,
                                          @RequestParam Boolean approved, @PathVariable Long bookingId) {
         log.info("GATEWAY: Patch booking {}, userId={}, approved={}", bookingId, userId, approved);
-        if (approved == null) {
-            throw new ValidationException("Approved не может быть пустым!");
-        }
+        validation.validate(approved);
         return bookingClient.update(userId, bookingId, approved);
     }
 

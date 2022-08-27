@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 
 @RestController
@@ -14,12 +13,11 @@ import ru.practicum.shareit.user.dto.UserDto;
 public class UserController {
 
     private final UserClient userClient;
+    private final UserValidation validation;
 
     @PostMapping
     public ResponseEntity<Object> addNewUser(@RequestBody UserDto userDto) {
-        if (userDto.getEmail() == null || !userDto.getEmail().contains("@")) {
-            throw new ValidationException("Невалидный email");
-        }
+        validation.validate(userDto);
         log.info("GATEWAY: Add new user {}", userDto);
         return userClient.addNewUser(userDto);
     }

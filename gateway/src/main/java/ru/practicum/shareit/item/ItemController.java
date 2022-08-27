@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
-import javax.validation.ValidationException;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
@@ -21,13 +20,11 @@ public class ItemController {
 
     private static final String HEADER = "X-Sharer-User-Id";
     private final ItemClient itemClient;
+    private final ItemValidation validation;
 
     @PostMapping
     public ResponseEntity<Object> addItem(@RequestHeader(HEADER) long userId, @RequestBody ItemDto itemDto) {
-        if (itemDto.getName().isEmpty() || itemDto.getDescription() == null || itemDto.getDescription().isEmpty()
-                || itemDto.getAvailable() == null) {
-            throw new ValidationException("GATEWAY: Невалидные данные");
-        }
+        validation.validate(itemDto);
         log.info("GATEWAY: User {} create item {}", userId, itemDto);
         return itemClient.addItem(userId, itemDto);
     }
@@ -71,9 +68,7 @@ public class ItemController {
     public ResponseEntity<Object> addComment(@RequestHeader(HEADER) long userId, @PathVariable long itemId,
                                  @RequestBody CommentDto commentDto) {
         log.info("GATEWAY: User {} adds comment {} to item {}", userId, commentDto, itemId);
-        if (commentDto.getText().isBlank()) {
-            throw new ValidationException("Empty comment");
-        }
+        validation.validate(commentDto);
         return itemClient.addComment(userId, itemId, commentDto);
     }
 }
